@@ -1,0 +1,5 @@
+.idea
+*.py[c]
+db.sqlite3
+staticfiles
+.env

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Link Account - Pelotourney{% endblock %}
+
+{% block content %}
+  <h3 class="pb-3">Link to Peloton Account</h3>
+  {% if user.profile.has_valid_session %}
+    <div class="alert alert-success">Peloton account already linked on <b>{{ user.profile.last_linked|date:"l, F jS" }}</b> at <b>{{ user.profile.last_linked|date:"h:i A e" }}</b></div>
+  {% endif %}
+  <form action="{% url 'tournaments:authorize' %}" method="post">
+    {% csrf_token %}
+    <div class="row mb-3">
+      <label for="username_or_email" class="col-sm-4 col-md-3 col-xl-2 col-form-label">Username or Email</label>
+      <div class="col-sm-8 col-md-6 col-lg-4 col-xl-3">
+        <input type="text" class="form-control" id="username_or_email" name="username_or_email" value="{{ user.profile.username }}">
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label for="password" class="col-sm-4 col-md-3 col-xl-2 col-form-label">Password</label>
+      <div class="col-sm-8 col-md-6 col-lg-4 col-xl-3">
+        <input type="password" class="form-control" id="password" name="password">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Authorize</button>
+  </form>
+{% endblock %}

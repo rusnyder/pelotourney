@@ -1,0 +1,226 @@
+[
+  {
+    "model": "tournaments.PelotonProfile",
+    "pk": 1,
+    "fields": {
+      "username": "Dangerusss"
+    }
+  },
+  {
+    "model": "tournaments.PelotonProfile",
+    "pk": 2,
+    "fields": {
+      "username": "BaltimoreAnn"
+    }
+  },
+  {
+    "model": "tournaments.PelotonProfile",
+    "pk": 3,
+    "fields": {
+      "username": "Vmarchetti11"
+    }
+  },
+  {
+    "model": "tournaments.PelotonProfile",
+    "pk": 4,
+    "fields": {
+      "username": "taco_kell"
+    }
+  },
+  {
+    "model": "tournaments.PelotonProfile",
+    "pk": 5,
+    "fields": {
+      "username": "SamD6290"
+    }
+  },
+  {
+    "model": "tournaments.PelotonProfile",
+    "pk": 6,
+    "fields": {
+      "username": "vman747"
+    }
+  },
+  {
+    "model": "tournaments.PelotonProfile",
+    "pk": 7,
+    "fields": {
+      "username": "bradykillian"
+    }
+  },
+  {
+    "model": "tournaments.PelotonProfile",
+    "pk": 8,
+    "fields": {
+      "username": "DaddyPigCA"
+    }
+  },
+  {
+    "model": "tournaments.Tournament",
+    "pk": 1,
+    "fields": {
+      "name": "Resilience Summer Tournament #1",
+      "start_date": "2021-07-01T00:00:00.000Z",
+      "end_date": "2021-07-31T11:59:59.000Z",
+      "visibility": "private"
+    }
+  },
+  {
+    "model": "tournaments.Tournament",
+    "pk": 2,
+    "fields": {
+      "name": "Sample Public Tournament",
+      "start_date": "2021-08-01T00:00:00.000Z",
+      "end_date": "2021-08-30T11:59:59.000Z",
+      "visibility": "public"
+    }
+  },
+  {
+    "model": "tournaments.Tournament",
+    "pk": 3,
+    "fields": {
+      "name": "Sample Private Tournament",
+      "start_date": "2021-08-01T00:00:00.000Z",
+      "end_date": "2021-08-30T11:59:59.000Z",
+      "visibility": "private"
+    }
+  },
+  {
+    "model": "tournaments.TournamentTeam",
+    "pk": 1,
+    "fields": {
+      "name": "Team A",
+      "tournament": 1
+    }
+  },
+  {
+    "model": "tournaments.TournamentTeam",
+    "pk": 2,
+    "fields": {
+      "name": "Team B",
+      "tournament": 1
+    }
+  },
+  {
+    "model": "tournaments.TournamentMember",
+    "fields": {
+      "tournament": 1,
+      "peloton_profile": 1,
+      "team": 1,
+      "role": "owner"
+    }
+  },
+  {
+    "model": "tournaments.TournamentMember",
+    "fields": {
+      "tournament": 1,
+      "peloton_profile": 4,
+      "team": 1
+    }
+  },
+  {
+    "model": "tournaments.TournamentMember",
+    "fields": {
+      "tournament": 1,
+      "peloton_profile": 5,
+      "team": 1
+    }
+  },
+  {
+    "model": "tournaments.TournamentMember",
+    "fields": {
+      "tournament": 1,
+      "peloton_profile": 6,
+      "team": 1
+    }
+  },
+  {
+    "model": "tournaments.TournamentMember",
+    "fields": {
+      "tournament": 1,
+      "peloton_profile": 2,
+      "team": 2,
+      "role": "manager"
+    }
+  },
+  {
+    "model": "tournaments.TournamentMember",
+    "fields": {
+      "tournament": 1,
+      "peloton_profile": 3,
+      "team": 2
+    }
+  },
+  {
+    "model": "tournaments.TournamentMember",
+    "fields": {
+      "tournament": 1,
+      "peloton_profile": 7,
+      "team": 2
+    }
+  },
+  {
+    "model": "tournaments.TournamentMember",
+    "fields": {
+      "tournament": 1,
+      "peloton_profile": 8,
+      "team": 2
+    }
+  },
+  {
+    "model": "tournaments.Ride",
+    "pk": 1,
+    "fields": {
+      "peloton_id": "ea7c2ffcc1434c29a04a45c6318d4011"
+    }
+  },
+  {
+    "model": "tournaments.TournamentRide",
+    "fields": {
+      "tournament": 1,
+      "ride": 1
+    }
+  },
+  {
+    "model": "tournaments.Ride",
+    "pk": 2,
+    "fields": {
+      "peloton_id": "07d4b5be64f94675accbea13ff7c5d3b"
+    }
+  },
+  {
+    "model": "tournaments.TournamentRide",
+    "fields": {
+      "tournament": 1,
+      "ride_id": 2
+    }
+  },
+  {
+    "model": "tournaments.Ride",
+    "pk": 3,
+    "fields": {
+      "peloton_id": "d9b079e1a0ad498a9ce861c3510195d5"
+    }
+  },
+  {
+    "model": "tournaments.TournamentRide",
+    "fields": {
+      "tournament": 1,
+      "ride_id": 3
+    }
+  },
+  {
+    "model": "tournaments.Ride",
+    "pk": 4,
+    "fields": {
+      "peloton_id": "ae25d21148414a2aae9a8a9350cad548"
+    }
+  },
+  {
+    "model": "tournaments.TournamentRide",
+    "fields": {
+      "tournament": 1,
+      "ride_id": 4
+    }
+  }
+]

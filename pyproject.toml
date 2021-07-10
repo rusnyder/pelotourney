@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "peloton-tourney"
+version = "0.1.0"
+description = "Webapp for organizing and scoring Peloton competitions"
+authors = ["Russell Snyder <russ@arceo.ai>"]
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "~3.7"
+
+django = "*"
+django-fernet-fields = "*"
+django-structlog = "*"
+python-dotenv = "*"
+python-jose = "*"
+requests = "*"
+social-auth-app-django = "*"
+structlog = "*"
+whitenoise = "*"
+
+[tool.poetry.dev-dependencies]
+black = "==21.6b0"
+isort = "*"
+ipython = "*"
+colorama = "*"
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | preproduction  # Ignore the preproduction directory entirely
+  )/
+)
+'''
+
+[tool.isort]
+# Black-compatible isort configuration: https://pycqa.github.io/isort/docs/configuration/black_compatibility/
+profile = "black"
+multi_line_output = 3
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+

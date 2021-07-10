@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load tournament_extras %}
+
+{% block title %}Tournaments - Pelotourney{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-row align-items-center mb-2">
+    <h2 class="me-auto">My Tournaments</h2>
+    <button class="btn btn-primary" {% if not user.profile %}disabled{% endif %}>
+      <i class="bi-plus-circle pe-2"></i>Create Tournament
+    </button>
+  </div>
+
+  {% if not user.profile %}
+  <div class="alert alert-light">
+    <i class="bi-info-circle-fill pe-2"></i><a href="{% url "tournaments:authorize" %}">Link your Peloton account</a> to begin participating in tournaments.
+  </div>
+  {% else %}
+  <div class="row row-cols-1 g-4">
+    {% for key in "active,upcoming,recent"|split:"," %}
+    <div class="col">
+      <div class="card">
+        <div class="card-header">{{ key|title }}</div>
+        <div class="card-body">
+          {% if tournaments|get_item:key %}
+          <table class="table table-hover border-light mb-0">
+            <thead>
+              <tr class="p-3">
+                <th>Name</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Participants</th>
+              </tr>
+            </thead>
+            <tbody class="card-text">
+              {# NOTE: `transform` is a NoOp hack to limit the bound of `stretched-link` to the table row. #}
+              {# See: https://getbootstrap.com/docs/5.0/helpers/stretched-link/#identifying-the-containing-block #}
+              {% for tournament in tournaments|get_item:key %}
+              <tr style="transform: rotate(0);">
+                <td><a class="text-dark stretched-link text-decoration-none" href="{% url 'tournaments:detail' tournament.id %}">{{ tournament.name }}</a></td>
+                <td>{{ tournament.start_date }}</td>
+                <td>{{ tournament.end_date }}</td>
+                <td>{{ tournament.participants.count }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+            <p class="text-muted fst-italic mb-0">No tournaments.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+{% endblock %}

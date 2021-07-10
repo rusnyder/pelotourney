@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load tournament_extras %}
+
+{% block title %}{{ tournament.name }} - Pelotourney{% endblock %}
+
+{% block head %}
+  <style>
+    td.hover:hover {
+      background-color: rgba(0,0,0,.075);
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h2>{{ tournament.name }}</h2>
+
+  <div class="d-flex flex-row align-items-center mb-0">
+    <div class="me-auto">
+        <div class="text-muted fst-italic my-2">
+        {% if tournament.last_synced %}
+        Last Synced: {{ tournament.last_synced|date:"l, F jS" }} at {{ tournament.last_synced|date:"h:i A e" }}
+        {% else %}
+        Never synced
+        {% endif %}
+      </div>
+    </div>
+    {% if user.profile in tournament.admins %}
+    <form action="{% url 'tournaments:sync' tournament.id %}" method="post">
+      {% csrf_token %}
+      <span {% if not user.profile.has_valid_session %}tabindex="0" data-bs-toggle="tooltip" data-bs-placement="left" title="Link Peloton Profile to enable syncing"{% endif %}>
+        <button type="submit" class="btn btn-outline-success" {% if not user.profile.peloton_session_id %}disabled{% endif %}>
+          <i class="bi-arrow-repeat pe-2"></i>Sync Now
+        </button>
+      </span>
+    </form>
+    {% elif user.is_authenticated %}
+    <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="left" title="Only tournament admins can sync Peloton data.">
+      <button class="btn btn-outline-success" disabled>
+        <i class="bi-arrow-repeat pe-2"></i>Sync Now
+      </button>
+    </span>
+    {% endif %}
+  </div>
+  <hr class="mt-2">
+  <div class="row row-cols-1 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 g-4">
+    {% with heading_classes="fw-bold text-uppercase text-black-50" %}
+    {% with value_classes="fw-light" %}
+    <div class="col">
+      <div class="{{ heading_classes }}">Starts</div>
+      <div class="{{ value_classes }}">{{ tournament.start_date|date:"l, F jS, Y" }}</div>
+    </div>
+    <div class="col">
+      <div class="{{ heading_classes }}">Ends</div>
+      <div class="{{ value_classes }}">{{ tournament.end_date|date:"l, F jS, Y" }}</div>
+    </div>
+    <div class="col">
+      <div class="{{ heading_classes }}">Teams</div>
+      <div class="{{ value_classes }}">{{ tournament.teams.count }}</div>
+    </div>
+    <div class="col">
+      <div class="{{ heading_classes }}">Participants</div>
+      <div class="{{ value_classes }}">{{ tournament.participants.count }}</div>
+    </div>
+    {% endwith %}
+    {% endwith %}
+  </div>
+  <hr class="mb-4">
+
+  <h4>Teams</h4>
+  <div class="row row-cols-1 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 g-4 mb-4">
+    {% if not tournament.teams.exists %}
+    <p class="text-muted fst-italic mb-0">No teams.</p>
+    {% else %}
+    {% for team in tournament.teams.all %}
+    <div class="col">
+      <div class="card">
+        <div class="card-header">{{ team.name }}</div>
+        <div class="">
+          <table class="table table-borderless table-hover card-text mb-0">
+            <tbody>
+              {% for member in team.members.all %}
+              {# NOTE: `transform` is a NoOp hack to limit the bound of `stretched-link` to the table row. #}
+              {# See: https://getbootstrap.com/docs/5.0/helpers/stretched-link/#identifying-the-containing-block #}
+              <tr style="transform: rotate(0);">
+                <td class="px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}">
+                <a class="text-dark stretched-link text-decoration-none" href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank">
+                  {% if member.image_url %}
+                  <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
+                  {% else %}
+                  <span class="user-icon">{{ member.username|first|upper }}</span>
+                  {% endif %}
+                  {{ member.username }}
+                </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  <h4>Best Rides</h4>
+  {% if not tournament.rides.exists %}
+  <p class="text-muted fst-italic mb-0">No rides.</p>
+  {% elif not tournament.last_synced %}
+  <div class="alert alert-warning">
+    <i class="bi-exclamation-triangle"></i> Workouts not yet synced from Peloton.
+  </div>
+  {% else %}
+  {% for team in tournament.teams.all %}
+  <div class="card my-2">
+    <div class="card-header">{{ team.name }}</div>
+    <div class="card-body">
+      <div class="row row-cols-1 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 g-4 mb-3">
+        <div class="col">
+          <div class="fw-bold text-uppercase text-black-50">Total Output</div>
+          <div class="fw-light">{{ team.total_work|div:1000|floatformat:0 }} <span class="small">kj</span></div>
+        </div>
+        <div class="col">
+          <div class="fw-bold text-uppercase text-black-50">Qualifying Rides</div>
+          <div class="fw-light">{{ team.best_workouts.count }}</div>
+        </div>
+        <div class="col">
+          <div class="fw-bold text-uppercase text-black-50">Average Output</div>
+          <div class="fw-light">{{ team.best_workouts|select:"average_output"|sum|div:team.best_workouts.count|floatformat:0 }} <span class="small">watts</span></div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table caption-top">
+          <thead>
+            <tr>
+              <th>Ride</th>
+              {% for member in team.members.all %}
+              <th>{{ member.username }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for ride in tournament.rides.all %}
+            <tr>
+              <td class="hover" style="transform: rotate(0);">
+                <a class="stretched-link text-decoration-none text-dark"
+                   href="https://members.onepeloton.com/classes/cycling?modal=classDetailsModal&classId={{ ride.peloton_id }}"
+                   target="_blank">
+                  {% if ride.instructor.image_url %}
+                  <img src="{{ ride.instructor.image_url }}" alt="{{ ride.instructor.name }}" width="24" height="24" class="rounded-circle"> {{ ride.title }}
+                  {% else %}
+                  {{ ride }} <span class="text-muted">({{ ride.instructor.name }})</span>
+                  {% endif %}
+                </a>
+              </td>
+              {% with ride_id=ride.id|stringformat:"i" %}
+              {% with ride_filter="ride__id="|add:ride_id %}
+              {% for member in team.members.all %}
+              {% with best_workout=member.best_workouts|model_filter:ride_filter|dictsortreversed:"total_work"|first %}
+              {% if best_workout %}
+                <td class="hover" style="transform: rotate(0);">
+                  <a class="stretched-link text-decoration-none text-dark"
+                     href="https://members.onepeloton.com/profile/workouts/{{ best_workout.peloton_id }}"
+                     target="_blank">
+                    {{ best_workout.total_work|div:1000|floatformat:0 }} <span class="small">kj</span>
+                  </a>
+                </td>
+              {% else %}
+                <td>-</td>
+              {% endif %}
+              {% endwith %}
+              {% endfor %}
+              {% endwith %}
+              {% endwith %}
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total</th>
+              {% for member in team.members.all %}
+              {% with tournament_id=tournament.id|stringformat:"i" %}
+              {% with tournament_filter="ride__tournament__id="|add:tournament_id %}
+              <td>{{ member.best_workouts|model_filter:tournament_filter|select:"total_work"|sum|div:1000|floatformat:0 }} <span class="small">kj</span></td>
+              {% endwith %}
+              {% endwith %}
+              {% endfor %}
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+{% endblock %}
