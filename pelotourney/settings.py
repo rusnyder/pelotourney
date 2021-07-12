@@ -33,6 +33,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = []
+DOMAIN = os.getenv("DOMAIN")
+if DOMAIN:
+    ALLOWED_HOSTS.append(DOMAIN)
 
 
 # Application definition
