@@ -9,9 +9,11 @@ packages = []
 [tool.poetry.dependencies]
 python = "~3.7"
 
+dj-database-url = "*"
 django = "*"
 django-fernet-fields = "*"
 django-structlog = "*"
+psycopg2 = "*"
 python-dotenv = "*"
 python-jose = "*"
 requests = "*"
