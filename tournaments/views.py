@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, reverse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import dateparse, timezone
 from django.views import generic
 
 from .external.peloton import BadCredentials, NotAuthenticated, PelotonClient
-from .models import PelotonProfile, Tournament, Workout
+from .models import PelotonProfile, Tournament, TournamentMember, Workout
 
 
 class IndexView(LoginRequiredMixin, generic.View):
@@ -33,6 +33,34 @@ class IndexView(LoginRequiredMixin, generic.View):
             ).order_by("-start_date")
         context = {"tournaments": tournaments}
         return render(request, "tournaments/index.html", context)
+
+
+class CreateView(generic.View):
+    def get(self, request):
+        return render(request, "tournaments/new.html")
+
+    def post(self, request):
+        start_date = datetime.combine(
+            dateparse.parse_date(request.POST["start_date"]),
+            dateparse.parse_time("00:00:00.000"),
+        )
+        end_date = datetime.combine(
+            dateparse.parse_date(request.POST["end_date"]),
+            dateparse.parse_time("11:59:59.999"),
+        )
+        tournament = Tournament.objects.create(
+            name=request.POST["tournament_name"],
+            format=Tournament.Format.SIMPLE,
+            start_date=timezone.utc.localize(start_date),
+            end_date=timezone.utc.localize(end_date),
+            visibility=request.POST["visibility"],
+        )
+        TournamentMember.objects.create(
+            tournament=tournament,
+            peloton_profile=request.user.profile,
+            role=TournamentMember.Role.OWNER,
+        )
+        return redirect("tournaments:detail", tournament.id)
 
 
 class DetailView(generic.View):
@@ -85,7 +113,7 @@ class SyncView(LoginRequiredMixin, generic.View):
         # Redirect back to the tournament page
         tournament.last_synced = datetime.utcnow()
         tournament.save()
-        return HttpResponseRedirect(reverse("tournaments:detail", args=[tournament.id]))
+        return redirect("tournaments:detail", tournament.id)
 
 
 class LinkProfileView(LoginRequiredMixin, generic.View):
@@ -115,7 +143,7 @@ class LinkProfileView(LoginRequiredMixin, generic.View):
         profile.save()
 
         # Redirect to the tournaments page
-        return HttpResponseRedirect(reverse("tournaments:index"))
+        return redirect("tournaments:index")
 
     @staticmethod
     def _handle_error(request, error_message: str):

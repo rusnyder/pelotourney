@@ -18,9 +18,10 @@ from django.urls import include, path
 
 from .views import index, logout
 
+app_name = "pelotourney"
 urlpatterns = [
     path("", index),
-    path("logout", logout),
+    path("logout", logout, name="logout_custom"),
     path("tournaments/", include("tournaments.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("social/", include("social_django.urls")),

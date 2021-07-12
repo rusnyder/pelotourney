@@ -6,9 +6,16 @@
 {% block content %}
   <div class="d-flex flex-row align-items-center mb-2">
     <h2 class="me-auto">My Tournaments</h2>
-    <button class="btn btn-primary" {% if not user.profile %}disabled{% endif %}>
-      <i class="bi-plus-circle pe-2"></i>Create Tournament
-    </button>
+    <span
+      {% if not user.profile.has_valid_session %}
+      tabindex="0" data-bs-toggle="tooltip" data-bs-placement="left"
+      title="Link your Peloton profile to manage tournaments"
+      {% endif %}
+    >
+      <a href="{% url "tournaments:create" %}" class="btn btn-primary {% if not user.profile.has_valid_session %}disabled{% endif %}">
+        <i class="bi-plus-circle pe-2"></i>Create Tournament
+      </a>
+    </span>
   </div>
 
   {% if not user.profile %}

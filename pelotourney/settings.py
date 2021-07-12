@@ -15,6 +15,7 @@ from pathlib import Path
 
 import dj_database_url
 import structlog
+from django.urls import reverse_lazy
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -207,7 +208,7 @@ structlog.configure(
 )
 
 # Setting up login and redirect URLs
-LOGIN_URL = "/login/auth0/"
+LOGIN_URL = reverse_lazy("social:begin", kwargs={"backend": "auth0"})
 LOGIN_REDIRECT_URL = "/"
 
 # Social auth

@@ -6,6 +6,8 @@ app_name = "tournaments"
 urlpatterns = [
     # ex: /tournaments/
     path("", views.IndexView.as_view(), name="index"),
+    # ex: /tournaments/new
+    path("new/", views.CreateView.as_view(), name="create"),
     # ex: /tournaments/authorize
     path("authorize/", views.LinkProfileView.as_view(), name="authorize"),
     # ex: /tournaments/5/
