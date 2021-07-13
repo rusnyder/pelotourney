@@ -4,8 +4,39 @@
 
 {% block head %}
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+
+  <script>
+    function activateTab() {
+      if (window.location.hash) {
+        const selectedTabElement = document.querySelector(`${window.location.hash}-tab`);
+        if (selectedTabElement) {
+          const selectedTab = new bootstrap.Tab(selectedTabElement);
+          selectedTab.show();
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', activateTab);
+    window.addEventListener("hashchange", activateTab);
+  </script>
 {% endblock %}
 
 {% block content %}
-  
+  <div class="mx-auto" style="max-width: 992px;">
+    <h3 class="mb-3">Edit Tournament</h3>
+
+    <div class="d-flex align-items-start">
+      <div class="nav flex-column nav-pills me-3" id="editor-tabs" role="tablist" aria-orientation="vertical">
+        <button class="nav-link active" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="true">Settings</button>
+        <button class="nav-link" id="participants-tab" data-bs-toggle="pill" data-bs-target="#participants" type="button" role="tab" aria-controls="participants" aria-selected="false">Participants</button>
+      </div>
+      <div class="tab-content border-start border-dark ps-4" id="tabContent">
+        <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+          {% include "tournaments/edit-form.html" with tournament=tournament submit_to="tournaments:edit" %}
+        </div>
+        <div class="tab-pane fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">
+          Edit participants here!
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

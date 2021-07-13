@@ -12,6 +12,8 @@ urlpatterns = [
     path("authorize/", views.LinkProfileView.as_view(), name="authorize"),
     # ex: /tournaments/5/
     path("<int:pk>/", views.DetailView.as_view(), name="detail"),
+    # ex: /tournaments/5/edit
+    path("<int:pk>/edit", views.EditView.as_view(), name="edit"),
     # ex: /tournaments/5/sync
     path("<int:pk>/sync", views.SyncView.as_view(), name="sync"),
 ]

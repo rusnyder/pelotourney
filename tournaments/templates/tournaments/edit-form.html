@@ -1,0 +1,49 @@
+<form class="row g-3" method="post"
+      action="{% if tournament %}{% url "tournaments:edit" tournament.id %}{% else %}{% url "tournaments:create" %}{% endif %}" >
+  {% csrf_token %}
+
+  <div class="col-12">
+    <label for="tournament_name" class="form-label">Tournament Name</label>{% if not tournament %}<span class="text-danger ps-1">*</span>{% endif %}
+    <input type="text" class="form-control" id="tournament_name" name="tournament_name" value="{{ tournament.name }}" required>
+  </div>
+  <div class="col-6">
+    <label for="start_date" class="form-label">Start Date</label>{% if not tournament %}<span class="text-danger ps-1">*</span>{% endif %}
+    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ tournament.start_date|date:"Y-m-d" }}" required>
+  </div>
+  <div class="col-6">
+    <label for="end_date" class="form-label">End Date</label>{% if not tournament %}<span class="text-danger ps-1">*</span>{% endif %}
+    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ tournament.end_date|date:"Y-m-d" }}" required>
+  </div>
+
+  <hr class="mb-0">
+  <div class="col">
+    <div class="form-label">Visibility</div>
+    <div class="form-check d-flex flex-row align-items-center mb-2" style="font-size: 0.9em;">
+      <input class="form-check-input mb-2 pr-3" type="radio" name="visibility" value="public" id="visibility_public"
+             {% if tournament and tournament.visibility == "public" %}checked{% endif %}>
+      <div class="d-inline-block text-muted fs-2 me-2 ms-2">
+        <i class="bi bi-unlock"></i>
+      </div>
+      <div>
+        <label class="form-check-label" for="visibility_public">Public</label>
+        <div id="visibilityHelp" class="form-text my-0">Anyone on the internet can see this tournament. You choose who can participate.</div>
+      </div>
+    </div>
+    <div class="form-check d-flex flex-row align-items-center" style="font-size: 0.9em;">
+      <input class="form-check-input mb-2 pr-3" type="radio" name="visibility" value="private" id="visibility_private"
+             {% if not tournament or tournament.visibility == "private" %}checked{% endif %}>
+      <div class="d-inline-block text-muted fs-2 me-2 ms-2">
+        <i class="bi bi-lock"></i>
+      </div>
+      <div>
+        <label class="form-check-label" for="visibility_private">Private</label>
+        <div id="visibilityHelp" class="form-text my-0">Only participants can see this tournament.</div>
+      </div>
+    </div>
+  </div>
+  <hr>
+
+  <div class="col-12">
+    <button type="submit" class="btn btn-primary">{% if tournament %}Update{% else %}Submit{% endif %}</button>
+  </div>
+</form>

@@ -14,16 +14,18 @@
 {% block content %}
   <div class="d-flex flex-row align-items-center mb-2">
     <h2 class="mb-0 me-3">{{ tournament.name }}</h2>
-    {% if tournament.visibility == "public" %}
-    <span class="badge bg-primary" tabindex="0"
-          data-bs-toggle="tooltip" data-bs-placement="right"
-          title="Anyone with the link can see this tournament.">Public</span>
-    {% elif tournament.visibility == "private" %}
-    <span class="badge bg-secondary" tabindex="0"
-          data-bs-toggle="tooltip" data-bs-placement="right"
-          title="Only participants can see this tournament.">Private</span>
-    {% else %}
-    {% endif %}
+    <div class="me-auto">
+      {% if tournament.visibility == "public" %}
+      <span class="badge bg-primary" tabindex="0"
+            data-bs-toggle="tooltip" data-bs-placement="right"
+            title="Anyone with the link can see this tournament.">Public</span>
+      {% elif tournament.visibility == "private" %}
+      <span class="badge bg-secondary" tabindex="0"
+            data-bs-toggle="tooltip" data-bs-placement="right"
+            title="Only participants can see this tournament.">Private</span>
+      {% endif %}
+    </div>
+    <a href="{% url "tournaments:edit" tournament.id %}" class="btn btn-primary">Edit Tournament</a>
   </div>
 
   <div class="d-flex flex-row align-items-center mb-0">

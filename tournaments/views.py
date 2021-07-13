@@ -75,6 +75,36 @@ class DetailView(generic.View):
         return render(request, "tournaments/detail.html", context)
 
 
+class EditView(LoginRequiredMixin, generic.View):
+    def get(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins:
+            raise PermissionDenied()
+        context = {"tournament": tournament}
+        return render(request, "tournaments/edit.html", context)
+
+    def post(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+
+        # Save all form fields again (even if it's a noop, this is just easier)
+        start_date = datetime.combine(
+            dateparse.parse_date(request.POST["start_date"]),
+            dateparse.parse_time("00:00:00.000"),
+        )
+        end_date = datetime.combine(
+            dateparse.parse_date(request.POST["end_date"]),
+            dateparse.parse_time("11:59:59.999"),
+        )
+        tournament.name = request.POST["tournament_name"]
+        tournament.start_date = timezone.utc.localize(start_date)
+        tournament.end_date = timezone.utc.localize(end_date)
+        tournament.visibility = request.POST["visibility"]
+        tournament.save()
+
+        # Redirect to the tournament page
+        return redirect("tournaments:detail", tournament.id)
+
+
 class SyncView(LoginRequiredMixin, generic.View):
     def post(self, request, pk):
         # Ensure the tournament exists
