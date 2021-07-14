@@ -15,8 +15,12 @@
         }
       }
     }
-    window.addEventListener('DOMContentLoaded', activateTab);
     window.addEventListener("hashchange", activateTab);
+    window.addEventListener('DOMContentLoaded', function() {
+      activateTab();
+
+      {% include "tournaments/components/team-list.js" %}
+    });
   </script>
 {% endblock %}
 
@@ -27,11 +31,74 @@
     <div class="d-flex align-items-start">
       <div class="nav flex-column nav-pills me-3" id="editor-tabs" role="tablist" aria-orientation="vertical">
         <button class="nav-link active" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="true">Settings</button>
+        <button class="nav-link" id="teams-tab" data-bs-toggle="pill" data-bs-target="#teams" type="button" role="tab" aria-controls="teams" aria-selected="false">Teams</button>
         <button class="nav-link" id="participants-tab" data-bs-toggle="pill" data-bs-target="#participants" type="button" role="tab" aria-controls="participants" aria-selected="false">Participants</button>
       </div>
-      <div class="tab-content border-start border-dark ps-4" id="tabContent">
+      <div class="tab-content border-start border-dark ps-4 w-100" id="tabContent">
         <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="settings-tab">
           {% include "tournaments/edit-form.html" with tournament=tournament submit_to="tournaments:edit" %}
+        </div>
+        <div class="tab-pane fade w-100" id="teams" role="tabpanel" aria-labelledby="teams-tab">
+          <h4>Unassigned</h4>
+          <div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-4 mb-4">
+            <div class="col">
+              <div class="card h-100">
+                <div id="team-unassigned" class="sortable-team list-group list-group-flush" style="min-height: 3rem;">
+                  {% for member in tournament.unassigned %}
+                  <a class="list-group-item list-group-item-action text-dark stretched-link text-decoration-none px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}"
+                     style="transform: rotate(0);"
+                     href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank">
+                    {% if member.image_url %}
+                    <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
+                    {% else %}
+                    <span class="user-icon-sm">{{ member.username|first|upper }}</span>
+                    {% endif %}
+                    {{ member.username }}
+                  </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card align-items-center">
+                <button type="button" class="btn btn-link text-decoration-none w-100"
+                        data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  <i class="bi-plus-circle pe-2"></i><span>Add Rider</span>
+                </button>
+              </div>
+
+              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <form action="{% url "tournaments:rider_search" tournament.id %}" method="post">
+                      {% csrf_token %}
+                      <div class="modal-header bg-light">
+                        <h5 class="modal-title text-secondary" id="ridersModalLabel">Add Peloton Riders</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="input-group col-12">
+                          <label class="d-none" for="rider_query">Enter a username</label>
+                          <input list="rider_list" class="form-control" id="rider_query" name="rider_query" placeholder="Enter a username">
+                          <span class="input-group-text" id="basic-addon2"><i class="bi-search"></i></span>
+                          <datalist id="rider_list"></datalist>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Rider</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h4>Teams</h4>
+          <div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-4 mb-4">
+            {% include "tournaments/components/team-list.html" with tournament=tournament editable=True %}
+          </div>
         </div>
         <div class="tab-pane fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">
           Edit participants here!

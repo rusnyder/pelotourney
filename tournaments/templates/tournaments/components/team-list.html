@@ -1,0 +1,41 @@
+{# Variables #}
+{# - tournament: models.Tournament #}
+{# - editable: bool #}
+
+{% if not tournament.teams.exists %}
+<p class="text-muted fst-italic mb-0">No teams.</p>
+{% else %}
+{% for team in tournament.teams.all %}
+<div class="col">
+  <div class="card h-100">
+    <div class="card-header">{{ team.name }}</div>
+    <div id="team-{{ team.id }}" class="{% if editable %}sortable-team{% endif %} list-group list-group-flush">
+        {% for member in team.members.all %}
+        {# NOTE: `transform` is a NoOp hack to limit the bound of `stretched-link` to the table row. #}
+        {# See: https://getbootstrap.com/docs/5.0/helpers/stretched-link/#identifying-the-containing-block #}
+          <a class="list-group-item list-group-item-action text-dark stretched-link text-decoration-none px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}"
+             style="transform: rotate(0);"
+             href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank">
+            {% if member.image_url %}
+            <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
+            {% else %}
+            <span class="user-icon-sm">{{ member.username|first|upper }}</span>
+            {% endif %}
+            {{ member.username }}
+          </a>
+        {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% if editable %}
+<div class="col">
+  <div class="card h-100 align-items-center">
+    <button class="btn btn-link text-decoration-none w-100 h-100 py-3">
+      <i class="bi-plus-circle d-block fs-1"></i>
+      <span class="d-block fs-4">Add Team</span>
+    </button>
+  </div>
+</div>
+{% endif %}
+{% endif %}

@@ -82,39 +82,7 @@
 
   <h4>Teams</h4>
   <div class="row row-cols-1 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 g-4 mb-4">
-    {% if not tournament.teams.exists %}
-    <p class="text-muted fst-italic mb-0">No teams.</p>
-    {% else %}
-    {% for team in tournament.teams.all %}
-    <div class="col">
-      <div class="card">
-        <div class="card-header">{{ team.name }}</div>
-        <div class="">
-          <table class="table table-borderless table-hover card-text mb-0">
-            <tbody>
-              {% for member in team.members.all %}
-              {# NOTE: `transform` is a NoOp hack to limit the bound of `stretched-link` to the table row. #}
-              {# See: https://getbootstrap.com/docs/5.0/helpers/stretched-link/#identifying-the-containing-block #}
-              <tr style="transform: rotate(0);">
-                <td class="px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}">
-                <a class="text-dark stretched-link text-decoration-none" href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank">
-                  {% if member.image_url %}
-                  <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
-                  {% else %}
-                  <span class="user-icon">{{ member.username|first|upper }}</span>
-                  {% endif %}
-                  {{ member.username }}
-                </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-    {% endif %}
+    {% include "tournaments/components/team-list.html" with tournament=tournament %}
   </div>
 
   <h4>Best Rides</h4>

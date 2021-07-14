@@ -16,4 +16,6 @@ urlpatterns = [
     path("<int:pk>/edit", views.EditView.as_view(), name="edit"),
     # ex: /tournaments/5/sync
     path("<int:pk>/sync", views.SyncView.as_view(), name="sync"),
+    # ex: /tournaments/5/rider_search
+    path("<int:pk>/rider_search", views.RiderSearchView.as_view(), name="rider_search"),
 ]

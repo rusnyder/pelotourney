@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.utils import dateparse, timezone
 from django.views import generic
 
@@ -144,6 +145,39 @@ class SyncView(LoginRequiredMixin, generic.View):
         tournament.last_synced = datetime.utcnow()
         tournament.save()
         return redirect("tournaments:detail", tournament.id)
+
+
+class RiderSearchView(LoginRequiredMixin, generic.View):
+    def get(self, request, pk):
+        # Search for riders
+        client = self._get_client(request)
+        riders = client.search_users(request.GET["rider_query"])
+        return JsonResponse(riders, safe=False)
+
+    def post(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+        username = request.POST["rider_query"]
+
+        client = self._get_client(request)
+        profile = PelotonProfile.from_peloton_id_or_username(
+            peloton_id="",
+            username=username,
+            client=client,
+        )
+        if profile not in tournament.participants.all():
+            TournamentMember.objects.create(
+                tournament=tournament,
+                peloton_profile=profile,
+                role=TournamentMember.Role.MEMBER,
+            )
+
+        return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#teams")
+
+    def _get_client(self, request) -> PelotonClient:
+        profile = request.user.profile
+        client = PelotonClient()
+        client.load_session(profile.peloton_session_id)
+        return client
 
 
 class LinkProfileView(LoginRequiredMixin, generic.View):

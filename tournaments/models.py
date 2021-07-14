@@ -327,6 +327,13 @@ class Tournament(models.Model):
             },
         )
 
+    @property
+    def unassigned(self) -> QuerySet:
+        return PelotonProfile.objects.filter(
+            tournamentmember__tournament=self,
+            tournamentmember__team__isnull=True,
+        )
+
     def __str__(self):
         return self.name
 

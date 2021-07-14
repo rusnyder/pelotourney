@@ -127,3 +127,10 @@ class PelotonClient(requests.Session):
 
     def get_rides(self, ride_ids: List[str]):
         return [self.get_json(f"/api/ride/{ride_id}") for ride_id in ride_ids]
+
+    def search_users(self, user_query: str, limit: int = 40) -> List[dict]:
+        data = self.get_json(
+            "/api/user/search",
+            params={"user_query": user_query, "limit": limit},
+        )
+        return data["data"]
