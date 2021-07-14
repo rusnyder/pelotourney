@@ -393,4 +393,5 @@ class TournamentMember(models.Model):
         unique_together = [["tournament", "peloton_profile", "team"]]
 
     def __str__(self):
-        return f"{self.peloton_profile.username} ({self.team.name})"
+        team_name = self.team.name if self.team else "unassigned"
+        return f"{self.peloton_profile.username} ({team_name})"

@@ -1,14 +1,21 @@
+import json
 from datetime import datetime, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.utils import dateparse, timezone
 from django.views import generic
 
 from .external.peloton import BadCredentials, NotAuthenticated, PelotonClient
-from .models import PelotonProfile, Tournament, TournamentMember, Workout
+from .models import (
+    PelotonProfile,
+    Tournament,
+    TournamentMember,
+    TournamentTeam,
+    Workout,
+)
 
 
 class IndexView(LoginRequiredMixin, generic.View):
@@ -157,7 +164,6 @@ class RiderSearchView(LoginRequiredMixin, generic.View):
     def post(self, request, pk):
         tournament = get_object_or_404(Tournament, pk=pk)
         username = request.POST["rider_query"]
-
         client = self._get_client(request)
         profile = PelotonProfile.from_peloton_id_or_username(
             peloton_id="",
@@ -173,11 +179,37 @@ class RiderSearchView(LoginRequiredMixin, generic.View):
 
         return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#teams")
 
+    def delete(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+        username = request.body.decode(request.encoding)
+        TournamentMember.objects.filter(
+            tournament=tournament,
+            peloton_profile__username=username,
+        ).delete()
+        return HttpResponse(status=204)
+
     def _get_client(self, request) -> PelotonClient:
         profile = request.user.profile
         client = PelotonClient()
         client.load_session(profile.peloton_session_id)
         return client
+
+
+class UpdateTeamsView(LoginRequiredMixin, generic.View):
+    def post(self, request, pk):
+        payload = json.loads(request.body)
+        for team in payload:
+            team_id = team["team_id"]
+            usernames = team["usernames"]
+            members = TournamentMember.objects.filter(
+                peloton_profile__username__in=usernames
+            )
+            if team_id == "unassigned":
+                members.update(team=None)
+            else:
+                team = TournamentTeam.objects.get(pk=team_id)
+                members.update(team=team)
+        return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#teams")
 
 
 class LinkProfileView(LoginRequiredMixin, generic.View):

@@ -13,16 +13,25 @@
         {% for member in team.members.all %}
         {# NOTE: `transform` is a NoOp hack to limit the bound of `stretched-link` to the table row. #}
         {# See: https://getbootstrap.com/docs/5.0/helpers/stretched-link/#identifying-the-containing-block #}
-          <a class="list-group-item list-group-item-action text-dark stretched-link text-decoration-none px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}"
-             style="transform: rotate(0);"
-             href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank">
+        <div class="list-group-item list-group-item-action text-dark px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}">
+          <a class="text-dark  text-decoration-none"
+{#          <a class="list-group-item list-group-item-action text-dark stretched-link text-decoration-none px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}"#}
+             style="transform: rotate(0); {% if editable %}cursor: grab;{% endif %}"
+             {% if not editable %}href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank"{% endif %}>
             {% if member.image_url %}
             <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
             {% else %}
             <span class="user-icon-sm">{{ member.username|first|upper }}</span>
             {% endif %}
-            {{ member.username }}
+            <span class="peloton-username">{{ member.username }}</span>
           </a>
+          {% if editable %}
+          <button class="btn btn-link float-end p-0 hover-danger text-secondary"
+                  onclick="deleteMember('{{ member.username }}');">
+            <i class="bi-x-circle-fill"></i>
+          </button>
+          {% endif %}
+        </div>
         {% endfor %}
     </div>
   </div>

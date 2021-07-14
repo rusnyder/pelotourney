@@ -4,6 +4,7 @@
 
 {% block head %}
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 
   <script>
     function activateTab() {
@@ -16,17 +17,17 @@
       }
     }
     window.addEventListener("hashchange", activateTab);
-    window.addEventListener('DOMContentLoaded', function() {
-      activateTab();
-
-      {% include "tournaments/components/team-list.js" %}
-    });
+    window.addEventListener("DOMContentLoaded", activateTab);
+    {% include "tournaments/components/team-list.js" %}
   </script>
 {% endblock %}
 
 {% block content %}
   <div class="mx-auto" style="max-width: 992px;">
-    <h3 class="mb-3">Edit Tournament</h3>
+    <div class="d-flex flex-row align-items-center mb-2">
+      <h3 class="mb-0 me-auto">Edit Tournament</h3>
+      <a href="{% url "tournaments:detail" tournament.id %}" class="btn btn-secondary">Back to Tournament</a>
+    </div>
 
     <div class="d-flex align-items-start">
       <div class="nav flex-column nav-pills me-3" id="editor-tabs" role="tablist" aria-orientation="vertical">
@@ -45,16 +46,15 @@
               <div class="card h-100">
                 <div id="team-unassigned" class="sortable-team list-group list-group-flush" style="min-height: 3rem;">
                   {% for member in tournament.unassigned %}
-                  <a class="list-group-item list-group-item-action text-dark stretched-link text-decoration-none px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}"
-                     style="transform: rotate(0);"
-                     href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank">
+                  <button class="list-group-item list-group-item-action text-dark stretched-link text-decoration-none px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}"
+                          style="transform: rotate(0);">
                     {% if member.image_url %}
                     <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
                     {% else %}
                     <span class="user-icon-sm">{{ member.username|first|upper }}</span>
                     {% endif %}
-                    {{ member.username }}
-                  </a>
+                    <span class="peloton-username">{{ member.username }}</span>
+                  </button>
                   {% endfor %}
                 </div>
               </div>
@@ -79,7 +79,7 @@
                       <div class="modal-body">
                         <div class="input-group col-12">
                           <label class="d-none" for="rider_query">Enter a username</label>
-                          <input list="rider_list" class="form-control" id="rider_query" name="rider_query" placeholder="Enter a username">
+                          <input list="rider_list" class="form-control" id="rider_query" autocomplete="off" name="rider_query" placeholder="Enter a username">
                           <span class="input-group-text" id="basic-addon2"><i class="bi-search"></i></span>
                           <datalist id="rider_list"></datalist>
                         </div>
@@ -99,6 +99,8 @@
           <div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-4 mb-4">
             {% include "tournaments/components/team-list.html" with tournament=tournament editable=True %}
           </div>
+
+          <button class="btn btn-primary" onclick="saveTeams();">Update Teams</button>
         </div>
         <div class="tab-pane fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">
           Edit participants here!
