@@ -7,6 +7,28 @@
   {% if user.profile.has_valid_session %}
     <div class="alert alert-success">Peloton account already linked on <b>{{ user.profile.last_linked|date:"l, F jS" }}</b> at <b>{{ user.profile.last_linked|date:"h:i A e" }}</b></div>
   {% endif %}
+
+  <div class="callout callout-info bg-light">
+    <h6><i class="bi-info-circle-fill pe-2"></i>Privacy Notice</h6>
+    <div class="mb-0" style="font-size: 0.8rem">
+      <p class="mb-2">
+        In order to sync workout information from Peloton, this app needs to be able
+        to act on your behalf when interacting with the Peloton API.
+      </p>
+      <p class="mb-1">
+        This app will perform the following actions on your behalf:
+      </p>
+      <ol class="mb-1">
+        <li>Use your credentials to login to the Peloton API over a secure connection</li>
+        <li>Encrypt and store a session id allowing Pelotourney to act on your behalf</li>
+        <li>Use that session id to sync data from Peloton</li>
+      </ol>
+      <p class="mb-0">
+        This app only keeps your password in-memory for as short a period as possible,
+        and will never store it or send it to any other services.
+      </p>
+    </div>
+  </div>
   <form action="{% url 'tournaments:authorize' %}" method="post">
     {% csrf_token %}
     <div class="row mb-3">
