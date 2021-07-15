@@ -4,7 +4,7 @@
   <div class="col col-lg-9 mb-3">
     <ul class="list-group">
       {% for member in tournament.tournamentmember_set.all %}
-        <li id="rider-permission-row-{{ member.uid }}" class="list-group-item d-flex flex-row align-items-center rider-permission-item">
+        <li id="rider-permission-row-{{ member.id }}" class="list-group-item d-flex flex-row align-items-center rider-permission-item">
           {% if member.peloton_profile.image_url %}
           <img src="{{ member.peloton_profile.image_url }}" alt="{{ member.peloton_profile.username }}" width="24" height="24"
                class="rounded-circle me-2">
