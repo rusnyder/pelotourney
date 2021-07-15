@@ -1,6 +1,6 @@
 function saveTeams() {
   const teams = $(".sortable-team").map(function() {
-    const teamId = this.id.split("-")[1];
+    const teamId = this.id.split("-").slice(-1).pop();
     const usernames = $(this).find(".peloton-username").map(function () {
       return this.innerText;
     }).toArray();
@@ -131,6 +131,29 @@ function updateRidesModal() {
   })
 }
 
+function savePermissions() {
+  const permissions = $(".rider-permission-item").map(function() {
+    const tournamentMemberId = this.id.split("-").slice(-1).pop();
+    const role = $(this).find("select").selectpicker("val")
+    return {
+      "tournament_member_id": tournamentMemberId,
+      "role": role,
+    };
+  }).toArray();
+  $.ajax({
+    url: "{% url 'tournaments:permissions' tournament.uid %}",
+    type: "POST",
+    data: JSON.stringify(permissions),
+    contentType: "application/json; charset=utf-8",
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
+    },
+    success: function(data) {
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#permissions");
+    }
+  });
+}
+
 window.addEventListener("DOMContentLoaded", function() {
   const elements = document.getElementsByClassName("sortable-team")
   for (let element of elements) {
@@ -235,4 +258,23 @@ window.addEventListener("DOMContentLoaded", function() {
 
   $("#ride-modal-instructor-id").on("changed.bs.select", updateRidesModal);
   $("#ride-modal-duration").on("changed.bs.select", updateRidesModal);
+
+  $(".role-selector").on("changed.bs.select", function(e, clickedIndex, isSelected, previousValue) {
+    // For some reason this also fires on the generated <div> container from
+    // bootstrap-select, but we just want to apply changes to the `<select>` element
+    if (this.tagName.toLowerCase() !== "select") {
+      return;
+    }
+    const originalValue = $(this).attr("data-original-selection");
+    if (originalValue === undefined) {
+      $(this).attr("data-original-selection", previousValue);
+    }
+    const currentValue = $(this).selectpicker("val");
+    if (currentValue !== originalValue) {
+      $(this).selectpicker("setStyle", "btn-warning");
+    } else {
+      $(this).selectpicker("setStyle", "btn-light");
+    }
+    $(this).selectpicker("render");
+  });
 });

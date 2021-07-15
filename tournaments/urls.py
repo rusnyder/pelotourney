@@ -21,9 +21,13 @@ urlpatterns = [
     # ex: /ZuwX4mKCPgK06sIin8QJxQ/teams
     path("<uid>/teams", views.EditTeamsView.as_view(), name="teams"),
     # ex: /ZuwX4mKCPgK06sIin8QJxQ/teams/bulk
-    path("<uid>/teams/bulk", views.BulkUpdateTeamsView.as_view(), name="update_teams"),
+    path("<uid>/teams/bulk", views.UpdateTeamsView.as_view(), name="update_teams"),
     # ex: /ZuwX4mKCPgK06sIin8QJxQ/rides
     path("<uid>/rides", views.EditRidesView.as_view(), name="rides"),
     # ex: /ZuwX4mKCPgK06sIin8QJxQ/rides/filters
     path("<uid>/rides/filters", views.RideFiltersView.as_view(), name="ride_filters"),
+    # ex: /ZuwX4mKCPgK06sIin8QJxQ/permissions
+    path(
+        "<uid>/permissions", views.UpdatePermissionsView.as_view(), name="permissions"
+    ),
 ]

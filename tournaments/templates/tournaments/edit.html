@@ -36,6 +36,7 @@
         <button class="nav-link active" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="true">Settings</button>
         <button class="nav-link" id="teams-tab" data-bs-toggle="pill" data-bs-target="#teams" type="button" role="tab" aria-controls="teams" aria-selected="false">Teams</button>
         <button class="nav-link" id="rides-tab" data-bs-toggle="pill" data-bs-target="#rides" type="button" role="tab" aria-controls="rides" aria-selected="false">Rides</button>
+        <button class="nav-link" id="permissions-tab" data-bs-toggle="pill" data-bs-target="#permissions" type="button" role="tab" aria-controls="permissions" aria-selected="false">Permissions</button>
       </div>
       <div class="tab-content border-start border-dark ps-4 w-100" id="tabContent">
         <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="settings-tab">
@@ -90,7 +91,7 @@
           <div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-4 mb-4">
             {% include "tournaments/components/team-list.html" with tournament=tournament editable=True %}
           </div>
-          <button class="btn btn-primary" onclick="saveTeams();">Update Teams</button>
+          <button class="btn btn-primary" onclick="saveTeams();">Save Changes</button>
         </div>
 
         <div class="tab-pane fade" id="rides" role="tabpanel" aria-labelledby="rides-tab">
@@ -176,6 +177,35 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade w-100" id="permissions" role="tabpanel" aria-labelledby="permissions-tab">
+          <div class="row">
+            <div class="col col-lg-9 mb-3">
+              <ul class="list-group">
+                {% for member in tournament.tournamentmember_set.all %}
+                  <li id="rider-permission-row-{{ member.uid }}" class="list-group-item d-flex flex-row align-items-center rider-permission-item">
+                    {% if member.peloton_profile.image_url %}
+                    <img src="{{ member.peloton_profile.image_url }}" alt="{{ member.peloton_profile.username }}" width="24" height="24"
+                         class="rounded-circle me-2">
+                    {% else %}
+                    <span class="user-icon-sm">{{ member.peloton_profile.username|first|upper }}</span>
+                    {% endif %}
+                    <span class="peloton-username">{{ member.peloton_profile.username }}</span>
+                    <label for="select-role-{{ member.uid }}" class="d-none">Select role</label>
+                    <select id="select-role-{{ member.uid }}" class="selectpicker ms-auto role-selector">
+                      {% for role, display_name in tournament.roles %}
+                      <option value="{{ role }}" {% if member.role == role %}selected{% endif %}>{{ display_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="col-12">
+              <button type="button" class="btn btn-primary" onclick="savePermissions();">Save Changes</button>
             </div>
           </div>
         </div>

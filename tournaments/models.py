@@ -298,6 +298,9 @@ class Tournament(BaseModel):
             tournamentmember__team__isnull=True,
         )
 
+    def roles(self):
+        return TournamentMember.Role.choices
+
     def __str__(self):
         return self.name
 

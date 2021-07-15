@@ -91,11 +91,7 @@
 
     function redirectOrRefresh(target) {
       window.location.href = target;
-      const currentPath = window.location.pathname;
-      const targetPath = new URL(target, window.location).pathname;
-      if (currentPath === targetPath) {
-        window.location.reload();
-      }
+      window.location.reload();
     }
 
     window.addEventListener('DOMContentLoaded', function() {

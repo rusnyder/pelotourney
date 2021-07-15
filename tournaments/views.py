@@ -225,7 +225,7 @@ class EditTeamsView(LoginRequiredMixin, generic.View):
         return HttpResponse(status=204)
 
 
-class BulkUpdateTeamsView(LoginRequiredMixin, generic.View):
+class UpdateTeamsView(LoginRequiredMixin, generic.View):
     def post(self, request, uid):
         tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins.all():
@@ -243,6 +243,21 @@ class BulkUpdateTeamsView(LoginRequiredMixin, generic.View):
             else:
                 team = TournamentTeam.objects.get(pk=team_id)
                 members.update(team=team)
+        return HttpResponse(status=200)
+
+
+class UpdatePermissionsView(LoginRequiredMixin, generic.View):
+    def post(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
+        if request.user.profile not in tournament.admins.all():
+            raise PermissionDenied()
+
+        payload = json.loads(request.body)
+        for item in payload:
+            TournamentMember.objects.filter(id=item["tournament_member_id"]).update(
+                role=item["role"]
+            )
+
         return HttpResponse(status=200)
 
 
