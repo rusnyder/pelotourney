@@ -2,7 +2,7 @@
 {# - tournament: models.Tournament #}
 {# - editable: bool #}
 
-{% if not tournament.teams.exists %}
+{% if not tournament.teams.exists and not editable %}
 <p class="text-muted fst-italic mb-0">No teams.</p>
 {% else %}
 {% for team in tournament.teams.all %}
