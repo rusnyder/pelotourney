@@ -8,31 +8,36 @@
 {% for team in tournament.teams.all %}
 <div class="col">
   <div class="card h-100">
-    <div class="card-header">{{ team.name }}</div>
-    <div id="team-{{ team.id }}" class="{% if editable %}sortable-team{% endif %} list-group list-group-flush">
-        {% for member in team.members.all %}
-        {# NOTE: `transform` is a NoOp hack to limit the bound of `stretched-link` to the table row. #}
-        {# See: https://getbootstrap.com/docs/5.0/helpers/stretched-link/#identifying-the-containing-block #}
-        <div class="list-group-item list-group-item-action text-dark px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}">
-          <a class="text-dark  text-decoration-none"
-{#          <a class="list-group-item list-group-item-action text-dark stretched-link text-decoration-none px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}"#}
-             style="transform: rotate(0); {% if editable %}cursor: grab;{% endif %}"
-             {% if not editable %}href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank"{% endif %}>
-            {% if member.image_url %}
-            <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
-            {% else %}
-            <span class="user-icon-sm">{{ member.username|first|upper }}</span>
-            {% endif %}
-            <span class="peloton-username">{{ member.username }}</span>
-          </a>
-          {% if editable %}
-          <button class="btn btn-link float-end p-0 hover-danger text-secondary"
-                  onclick="deleteMember('{{ member.username }}');">
-            <i class="bi-x-circle-fill"></i>
-          </button>
-          {% endif %}
+    <div class="card-header">
+      <span>{{ team.name }}</span>
+      {% if editable %}
+      <button type="button" data-bs-toggle="modal" data-bs-target="#delete-team-{{ team.id }}-modal"
+              class="btn btn-link float-end p-0 hover-danger text-secondary">
+        <i class="bi-x-circle-fill"></i>
+      </button>
+      <div class="modal fade" id="delete-team-{{ team.id }}-modal"
+           tabindex="-1" aria-labelledby="delete-team-{{ team.id }}-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="delete-team-{{ team.id }}-modal-label">Delete Team</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to delete "{{ team.name }}"?</p>
+              <small class="text-muted mb-0">NOTE: All team members will be unassigned.</small>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger" onclick="deleteTeam('{{ team.id }}');">Delete Team</button>
+            </div>
+          </div>
         </div>
-        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    <div id="team-{{ team.id }}" class="{% if editable %}sortable-team{% endif %} list-group list-group-flush">
+      {% include "tournaments/components/team-members.html" with members=team.members.all editable=editable %}
     </div>
   </div>
 </div>
@@ -40,10 +45,33 @@
 {% if editable %}
 <div class="col">
   <div class="card h-100 align-items-center">
-    <button class="btn btn-link text-decoration-none w-100 h-100 py-3">
+    <button type="button" data-bs-toggle="modal" data-bs-target="#add-team-modal"
+            class="btn btn-link text-decoration-none w-100 h-100 py-3">
       <i class="bi-plus-circle d-block fs-1"></i>
       <span class="d-block fs-4">Add Team</span>
     </button>
+
+    <div class="modal fade" id="add-team-modal" tabindex="-1" aria-labelledby="add-team-modal-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="{% url 'tournaments:teams' tournament.id %}" method="post">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title" id="add-team-modal-label">Add Team</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <label class="form-label" for="new_team_name">Team Name</label>
+              <input type="text" class="form-control" id="new_team_name" name="new_team_name" autocomplete="off">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Add Team</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endif %}

@@ -386,7 +386,7 @@ class TournamentMember(models.Model):
 
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     peloton_profile = models.ForeignKey(PelotonProfile, on_delete=models.CASCADE)
-    team = models.ForeignKey(TournamentTeam, on_delete=models.CASCADE, null=True)
+    team = models.ForeignKey(TournamentTeam, on_delete=models.SET_NULL, null=True)
     role = models.CharField(max_length=16, choices=Role.choices, default=Role.MEMBER)
 
     class Meta:

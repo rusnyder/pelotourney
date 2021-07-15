@@ -18,6 +18,16 @@ urlpatterns = [
     path("<int:pk>/sync", views.SyncView.as_view(), name="sync"),
     # ex: /tournaments/5/rider_search
     path("<int:pk>/rider_search", views.RiderSearchView.as_view(), name="rider_search"),
-    # ex: /tournaments/5/update_teams
-    path("<int:pk>/update_teams", views.UpdateTeamsView.as_view(), name="update_teams"),
+    # ex: /tournaments/5/teams
+    path("<int:pk>/teams", views.EditTeamsView.as_view(), name="teams"),
+    # ex: /tournaments/5/teams/bulk
+    path(
+        "<int:pk>/teams/bulk", views.BulkUpdateTeamsView.as_view(), name="update_teams"
+    ),
+    # ex: /tournaments/5/rides
+    path("<int:pk>/rides", views.EditRidesView.as_view(), name="rides"),
+    # ex: /tournaments/5/rides/filters
+    path(
+        "<int:pk>/rides/filters", views.RideFiltersView.as_view(), name="ride_filters"
+    ),
 ]

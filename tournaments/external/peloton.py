@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import Collection, List, Union
 
 import requests
 import structlog
@@ -127,6 +127,33 @@ class PelotonClient(requests.Session):
 
     def get_rides(self, ride_ids: List[str]):
         return [self.get_json(f"/api/ride/{ride_id}") for ride_id in ride_ids]
+
+    def search_rides(
+        self,
+        category: str = "cycling",
+        content_format: Union[str, Collection[str]] = ("audio", "video"),
+        limit: int = 18,
+        page: int = 0,
+        sort_by: str = "original_air_time",
+        desc: bool = True,
+        instructor_id: str = None,
+        duration: int = None,
+    ) -> List[dict]:
+        if isinstance(content_format, (tuple, list, set)):
+            content_format = ",".join(content_format)
+        params = {
+            "browse_category": category,
+            "content_format": content_format,
+            "limit": limit,
+            "page": page,
+            "sort_by": sort_by,
+            "desc": desc,
+        }
+        if instructor_id:
+            params["instructor_id"] = instructor_id
+        if duration:
+            params["duration"] = duration
+        return self.get_json("/api/v2/ride/archived", params=params)
 
     def search_users(self, user_query: str, limit: int = 40) -> List[dict]:
         data = self.get_json(

@@ -3,8 +3,13 @@
 {% block title %}Edit Tournament - Pelotourney{% endblock %}
 
 {% block head %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/css/bootstrap-select.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/js/bootstrap-select.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@2.0.1/build/global/luxon.min.js"
+          integrity="sha256-BdqBGuaawDzMtW2Wn9ISUuYKUY/A7d5NVcj6Ix3jwv8="
+          crossorigin="anonymous"></script>
 
   <script>
     function activateTab() {
@@ -33,47 +38,37 @@
       <div class="nav flex-column nav-pills me-3" id="editor-tabs" role="tablist" aria-orientation="vertical">
         <button class="nav-link active" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="true">Settings</button>
         <button class="nav-link" id="teams-tab" data-bs-toggle="pill" data-bs-target="#teams" type="button" role="tab" aria-controls="teams" aria-selected="false">Teams</button>
-        <button class="nav-link" id="participants-tab" data-bs-toggle="pill" data-bs-target="#participants" type="button" role="tab" aria-controls="participants" aria-selected="false">Participants</button>
+        <button class="nav-link" id="rides-tab" data-bs-toggle="pill" data-bs-target="#rides" type="button" role="tab" aria-controls="rides" aria-selected="false">Rides</button>
       </div>
       <div class="tab-content border-start border-dark ps-4 w-100" id="tabContent">
         <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="settings-tab">
           {% include "tournaments/edit-form.html" with tournament=tournament submit_to="tournaments:edit" %}
         </div>
+
         <div class="tab-pane fade w-100" id="teams" role="tabpanel" aria-labelledby="teams-tab">
           <h4>Unassigned</h4>
           <div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-4 mb-4">
             <div class="col">
               <div class="card h-100">
                 <div id="team-unassigned" class="sortable-team list-group list-group-flush" style="min-height: 3rem;">
-                  {% for member in tournament.unassigned %}
-                  <button class="list-group-item list-group-item-action text-dark stretched-link text-decoration-none px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}"
-                          style="transform: rotate(0);">
-                    {% if member.image_url %}
-                    <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
-                    {% else %}
-                    <span class="user-icon-sm">{{ member.username|first|upper }}</span>
-                    {% endif %}
-                    <span class="peloton-username">{{ member.username }}</span>
-                  </button>
-                  {% endfor %}
+                  {% include "tournaments/components/team-members.html" with members=tournament.unassigned.all editable=True %}
                 </div>
               </div>
             </div>
             <div class="col">
               <div class="card align-items-center">
                 <button type="button" class="btn btn-link text-decoration-none w-100"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        data-bs-toggle="modal" data-bs-target="#add-rider-modal">
                   <i class="bi-plus-circle pe-2"></i><span>Add Rider</span>
                 </button>
               </div>
-
-              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal fade" id="add-rider-modal" tabindex="-1" aria-labelledby="add-rider-modal-label" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <form action="{% url "tournaments:rider_search" tournament.id %}" method="post">
                       {% csrf_token %}
                       <div class="modal-header bg-light">
-                        <h5 class="modal-title text-secondary" id="ridersModalLabel">Add Peloton Riders</h5>
+                        <h5 class="modal-title text-secondary" id="add-rider-modal-label">Add Peloton Riders</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body">
@@ -94,16 +89,98 @@
               </div>
             </div>
           </div>
-
           <h4>Teams</h4>
           <div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-4 mb-4">
             {% include "tournaments/components/team-list.html" with tournament=tournament editable=True %}
           </div>
-
           <button class="btn btn-primary" onclick="saveTeams();">Update Teams</button>
         </div>
-        <div class="tab-pane fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">
-          Edit participants here!
+
+        <div class="tab-pane fade" id="rides" role="tabpanel" aria-labelledby="rides-tab">
+          <div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-4">
+            {% for ride in tournament.rides.all %}
+            <div class="col">
+              <div class="card h-100">
+                <img src="{{ ride.image_url }}" class="card-img-top" alt="{{ ride.title }}" style="height: 18vh; object-fit: cover;">
+                <div class="card-body p-2 d-flex flex-row">
+                  <img class="rounded-circle my-auto me-2"
+                       src="{{ ride.instructor.image_url }}" alt="{{ ride.instructor.name }}" width="32" height="32">
+                  <div class="col text-truncate">
+                    <div class="text-truncate">{{ ride.title }}</div>
+                    <div>
+                      <small class="text-muted">{{ ride.instructor.name }}</small>
+                    </div>
+                  </div>
+                  <button type="button" data-bs-toggle="modal" data-bs-target="#delete-ride-{{ ride.id }}-modal"
+                          class="btn btn-link ms-auto text-secondary hover-danger px-1">
+                    <i class="bi-x-circle-fill"></i>
+                  </button>
+                </div>
+                <div class="card-footer">
+                  <small class="text-muted">{{ ride.scheduled_start_time|date:"D n/j/y @ g:i A" }}</small>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="delete-ride-{{ ride.id }}-modal"
+                 tabindex="-1" aria-labelledby="delete-ride-{{ ride.id }}-modal-label" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="delete-ride-{{ ride.id }}-modal-label">Remove Ride</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Are you sure you want to remove "{{ ride.title }}" from the tournament?</p>
+                    <small class="text-muted mb-0">NOTE: It can be added back later and all existing ride data will still be synced.</small>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteRide('{{ ride.id }}');">Remove Ride</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="col">
+              <div class="card h-100 align-items-center">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#add-ride-modal"
+                        class="btn btn-link text-decoration-none w-100 h-100 py-3">
+                  <i class="bi-plus-circle d-block fs-1"></i>
+                  <span class="d-block fs-4">Add Ride</span>
+                </button>
+
+                <div class="modal fade" id="add-ride-modal" tabindex="-1" aria-labelledby="add-ride-modal-label" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="add-ride-modal-label">Add Ride</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body py-0">
+                        <div id="ride-modal-filters" class="row row-cols-2 sticky-top bg-white border-bottom py-3">
+                          <div class="col">
+                            <label for="ride-modal-instructor-id" class="d-none">Instructor</label>
+                            <select id="ride-modal-instructor-id" class="selectpicker" title="Instructor..." data-size="10"></select>
+                          </div>
+                          <div class="col">
+                            <label for="ride-modal-duration" class="d-none">Ride Duration</label>
+                            <select id="ride-modal-duration" class="selectpicker" title="Ride Duration..." data-size="10"></select>
+                          </div>
+                        </div>
+                        <div id="ride-modal-rides">
+                          <div class="d-flex justify-content-center">
+                            <div class="spinner-border text-secondary mx-auto my-5" role="status">
+                              <span class="visually-hidden">Loading...</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

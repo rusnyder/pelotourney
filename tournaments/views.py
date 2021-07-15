@@ -11,8 +11,10 @@ from django.views import generic
 from .external.peloton import BadCredentials, NotAuthenticated, PelotonClient
 from .models import (
     PelotonProfile,
+    Ride,
     Tournament,
     TournamentMember,
+    TournamentRide,
     TournamentTeam,
     Workout,
 )
@@ -93,6 +95,8 @@ class EditView(LoginRequiredMixin, generic.View):
 
     def post(self, request, pk):
         tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins:
+            raise PermissionDenied()
 
         # Save all form fields again (even if it's a noop, this is just easier)
         start_date = datetime.combine(
@@ -117,6 +121,8 @@ class SyncView(LoginRequiredMixin, generic.View):
     def post(self, request, pk):
         # Ensure the tournament exists
         tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins:
+            raise PermissionDenied()
 
         # Create a client logged into the Peloton API
         profile = request.user.profile
@@ -157,14 +163,17 @@ class SyncView(LoginRequiredMixin, generic.View):
 class RiderSearchView(LoginRequiredMixin, generic.View):
     def get(self, request, pk):
         # Search for riders
-        client = self._get_client(request)
+        client = _get_client(request)
         riders = client.search_users(request.GET["rider_query"])
         return JsonResponse(riders, safe=False)
 
     def post(self, request, pk):
         tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins:
+            raise PermissionDenied()
+
         username = request.POST["rider_query"]
-        client = self._get_client(request)
+        client = _get_client(request)
         profile = PelotonProfile.from_peloton_id_or_username(
             peloton_id="",
             username=username,
@@ -181,6 +190,9 @@ class RiderSearchView(LoginRequiredMixin, generic.View):
 
     def delete(self, request, pk):
         tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins.all():
+            raise PermissionDenied()
+
         username = request.body.decode(request.encoding)
         TournamentMember.objects.filter(
             tournament=tournament,
@@ -188,15 +200,37 @@ class RiderSearchView(LoginRequiredMixin, generic.View):
         ).delete()
         return HttpResponse(status=204)
 
-    def _get_client(self, request) -> PelotonClient:
-        profile = request.user.profile
-        client = PelotonClient()
-        client.load_session(profile.peloton_session_id)
-        return client
 
-
-class UpdateTeamsView(LoginRequiredMixin, generic.View):
+class EditTeamsView(LoginRequiredMixin, generic.View):
     def post(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins.all():
+            raise PermissionDenied()
+
+        team_name = request.POST["new_team_name"]
+        TournamentTeam.objects.create(
+            tournament=tournament,
+            name=team_name,
+        )
+        return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#teams")
+
+    def delete(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins.all():
+            raise PermissionDenied()
+
+        # Delete the team (cascade for members is setup to unassign them)
+        team_id = request.body.decode(request.encoding)
+        TournamentTeam.objects.filter(pk=team_id).delete()
+        return HttpResponse(status=204)
+
+
+class BulkUpdateTeamsView(LoginRequiredMixin, generic.View):
+    def post(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins.all():
+            raise PermissionDenied()
+
         payload = json.loads(request.body)
         for team in payload:
             team_id = team["team_id"]
@@ -209,7 +243,55 @@ class UpdateTeamsView(LoginRequiredMixin, generic.View):
             else:
                 team = TournamentTeam.objects.get(pk=team_id)
                 members.update(team=team)
-        return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#teams")
+        return HttpResponse(status=200)
+
+
+class RideFiltersView(LoginRequiredMixin, generic.View):
+    def get(self, request, pk):
+        client = _get_client(request)
+        resp = client.get_json(
+            "/api/ride/filters",
+            headers={"Peloton-Platform": "web"},
+            params={"library_type": "on_demand", "browse_category": "cycling"},
+        )
+        return JsonResponse(resp, status=200)
+
+
+class EditRidesView(LoginRequiredMixin, generic.View):
+    def get(self, request, pk):
+        client = _get_client(request)
+        instructor_id = request.GET.get("instructor_id") or None
+        duration = request.GET.get("duration") or None
+        resp = client.search_rides(
+            limit=50,
+            instructor_id=instructor_id,
+            duration=duration,
+        )
+        return JsonResponse(resp, status=200)
+
+    def post(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins.all():
+            raise PermissionDenied()
+
+        payload = json.loads(request.body)
+        ride_id = payload.get("ride_id")
+        client = _get_client(request)
+        ride = Ride.from_peloton_id(ride_id, client=client)
+        TournamentRide.objects.create(
+            tournament=tournament,
+            ride=ride,
+        )
+        return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#rides")
+
+    def delete(self, request, pk):
+        tournament = get_object_or_404(Tournament, pk=pk)
+        if request.user.profile not in tournament.admins.all():
+            raise PermissionDenied()
+
+        ride_id = request.body.decode(request.encoding)
+        TournamentRide.objects.filter(pk=ride_id).delete()
+        return HttpResponse(status=204)
 
 
 class LinkProfileView(LoginRequiredMixin, generic.View):
@@ -248,3 +330,10 @@ class LinkProfileView(LoginRequiredMixin, generic.View):
             "tournaments/authorize.html",
             {"error_message": error_message},
         )
+
+
+def _get_client(request) -> PelotonClient:
+    profile = request.user.profile
+    client = PelotonClient()
+    client.load_session(profile.peloton_session_id)
+    return client

@@ -1,0 +1,46 @@
+{# Varialbes #}
+{#  - members: Iterable[models.PelotonProfile] #}
+{#  - editable: bool #}
+{% for member in members %}
+{# NOTE: `transform` is a NoOp hack to limit the bound of `stretched-link` to the table row. #}
+{# See: https://getbootstrap.com/docs/5.0/helpers/stretched-link/#identifying-the-containing-block #}
+<div class="list-group-item list-group-item-action text-dark px-3 py-2 {% if not forloop.last%}border-bottom{% endif %}">
+  <a class="text-dark text-decoration-none"
+     style="transform: rotate(0); {% if editable %}cursor: grab;{% endif %}"
+     {% if not editable %}href="https://members.onepeloton.com/members/{{ member.username }}/overview" target="_blank"{% endif %}>
+    {% if member.image_url %}
+    <img src="{{ member.image_url }}" alt="{{ member.username }}" width="24" height="24" class="rounded-circle">
+    {% else %}
+    <span class="user-icon-sm">{{ member.username|first|upper }}</span>
+    {% endif %}
+    <span class="peloton-username">{{ member.username }}</span>
+  </a>
+  {% if editable %}
+  <button type="button" data-bs-toggle="modal" data-bs-target="#delete-member-{{ member.username }}-modal"
+          class="btn btn-link float-end p-0 hover-danger text-secondary">
+    <i class="bi-x-circle-fill"></i>
+  </button>
+  {% endif %}
+</div>
+{% if editable %}
+<div class="modal fade" id="delete-member-{{ member.username }}-modal"
+     tabindex="-1" aria-labelledby="delete-member-{{ member.username }}-modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="delete-member-{{ member.username }}-modal-label">Remove Rider</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to remove "{{ member.username }}" from the tournament?</p>
+        <small class="text-muted mb-0">NOTE: They can be added back later and their ride data will still be synced.</small>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" onclick="deleteMember('{{ member.username }}');">Remove Rider</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
