@@ -6,10 +6,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/css/bootstrap-select.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/js/bootstrap-select.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/luxon@2.0.1/build/global/luxon.min.js"
-          integrity="sha256-BdqBGuaawDzMtW2Wn9ISUuYKUY/A7d5NVcj6Ix3jwv8="
-          crossorigin="anonymous"></script>
 
   <script>
     function activateTab() {
@@ -33,6 +29,7 @@
       <h3 class="mb-0 me-auto">Edit Tournament</h3>
       <a href="{% url "tournaments:detail" tournament.id %}" class="btn btn-secondary">Back to Tournament</a>
     </div>
+    <p class="text-muted">{{ tournament.name }}</p>
 
     <div class="d-flex align-items-start">
       <div class="nav flex-column nav-pills me-3" id="editor-tabs" role="tablist" aria-orientation="vertical">
@@ -160,7 +157,7 @@
                         <div id="ride-modal-filters" class="row row-cols-2 sticky-top bg-white border-bottom py-3">
                           <div class="col">
                             <label for="ride-modal-instructor-id" class="d-none">Instructor</label>
-                            <select id="ride-modal-instructor-id" class="selectpicker" title="Instructor..." data-size="10"></select>
+                            <select id="ride-modal-instructor-id" class="selectpicker" title="Instructor..." data-size="10" data-live-search="true"></select>
                           </div>
                           <div class="col">
                             <label for="ride-modal-duration" class="d-none">Ride Duration</label>

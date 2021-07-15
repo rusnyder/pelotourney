@@ -9,6 +9,39 @@
       background-color: rgba(0,0,0,.075);
     }
   </style>
+
+  <script>
+  function syncTournament() {
+    // Disable sync button and update with spinner
+    const button = $("#sync-now-button");
+    const originalHTML = button.html();
+    button.prop("disabled", true);
+    button.addClass("btn-success");
+    button.removeClass("btn-outline-success");
+    button.html(`
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Syncing...
+    `.trim());
+
+    // Trigger the sync
+    $.ajax({
+      type: "POST",
+      url: "{% url 'tournaments:sync' tournament.id %}",
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
+      },
+      success: function(data) {
+        redirectOrRefresh("{% url 'tournaments:detail' tournament.id %}");
+      },
+      error: function(xhr) {
+        button.html(originalHTML);
+        button.addClass("btn-outline-success");
+        button.removeClass("btn-success");
+        button.prop("disabled", false);
+      },
+    });
+  }
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -39,17 +72,15 @@
       </div>
     </div>
     {% if user.profile in tournament.admins %}
-    <form action="{% url 'tournaments:sync' tournament.id %}" method="post">
-      {% csrf_token %}
-      <span {% if not user.profile.has_valid_session %}tabindex="0" data-bs-toggle="tooltip" data-bs-placement="left" title="Link Peloton Profile to enable syncing"{% endif %}>
-        <button type="submit" class="btn btn-outline-success" {% if not user.profile.peloton_session_id %}disabled{% endif %}>
-          <i class="bi-arrow-repeat pe-2"></i>Sync Now
-        </button>
-      </span>
-    </form>
+    <span {% if not user.profile.has_valid_session %}tabindex="0" data-bs-toggle="tooltip" data-bs-placement="left" title="Link Peloton Profile to enable syncing"{% endif %}>
+      <button id="sync-now-button" class="btn btn-outline-success" {% if not user.profile.peloton_session_id %}disabled{% endif %}
+              type="button" onclick="syncTournament();">
+        <i class="bi-arrow-repeat pe-2"></i>Sync Now
+      </button>
+    </span>
     {% elif user.is_authenticated %}
     <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="left" title="Only tournament admins can sync Peloton data.">
-      <button class="btn btn-outline-success" disabled>
+      <button id="sync-now-button" class="btn btn-outline-success" disabled>
         <i class="bi-arrow-repeat pe-2"></i>Sync Now
       </button>
     </span>

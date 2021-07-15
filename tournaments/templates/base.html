@@ -20,6 +20,14 @@
           integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
           crossorigin="anonymous"></script>
 
+  {# Luxon (DateTime) #}
+  <script src="https://cdn.jsdelivr.net/npm/luxon@2.0.1/build/global/luxon.min.js"
+          integrity="sha256-BdqBGuaawDzMtW2Wn9ISUuYKUY/A7d5NVcj6Ix3jwv8="
+          crossorigin="anonymous"></script>
+
+  {# JSCookie #}
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+
   {# Custom fonts #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,6 +77,23 @@
     }
   </style>
   <script>
+    function debounce(timeout, func) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      };
+    }
+
+    function redirectOrRefresh(target) {
+      window.location.href = target;
+      const currentPath = window.location.pathname;
+      const targetPath = new URL(target, window.location).pathname;
+      if (currentPath === targetPath) {
+        window.location.reload();
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {

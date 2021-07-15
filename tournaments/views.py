@@ -221,7 +221,7 @@ class EditTeamsView(LoginRequiredMixin, generic.View):
 
         # Delete the team (cascade for members is setup to unassign them)
         team_id = request.body.decode(request.encoding)
-        TournamentTeam.objects.filter(pk=team_id).delete()
+        TournamentTeam.objects.filter(id=team_id).delete()
         return HttpResponse(status=204)
 
 
@@ -290,7 +290,10 @@ class EditRidesView(LoginRequiredMixin, generic.View):
             raise PermissionDenied()
 
         ride_id = request.body.decode(request.encoding)
-        TournamentRide.objects.filter(pk=ride_id).delete()
+        TournamentRide.objects.filter(
+            tournament=tournament,
+            ride__id=ride_id,
+        ).delete()
         return HttpResponse(status=204)
 
 

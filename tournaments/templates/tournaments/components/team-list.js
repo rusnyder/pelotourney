@@ -1,20 +1,3 @@
-function debounce(timeout, func) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => { func.apply(this, args); }, timeout);
-  };
-}
-
-function redirectOrRefresh(target) {
-  const current = `${window.location.pathname}${window.location.hash}`;
-  if (current === target) {
-    window.location.reload();
-  } else {
-    window.location.href = target;
-  }
-}
-
 function saveTeams() {
   const teams = $(".sortable-team").map(function() {
     const teamId = this.id.split("-")[1];
