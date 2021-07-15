@@ -63,7 +63,7 @@
           data-bs-toggle="tooltip" data-bs-placement="left"
           title="Only tournament admins can edit this tournament."
           {% endif %}>
-      <a href="{% url "tournaments:edit" tournament.uid %}"
+      <a href="{% url "tournaments:edit" tournament.uid "settings" %}"
          class="btn btn-primary {% if user.profile not in tournament.admins %}disabled{% endif %}">
         Edit Tournament
       </a>

@@ -1,0 +1,28 @@
+{# Variables #}
+{#  - tournament: models.Tournament #}
+<div class="row">
+  <div class="col col-lg-9 mb-3">
+    <ul class="list-group">
+      {% for member in tournament.tournamentmember_set.all %}
+        <li id="rider-permission-row-{{ member.uid }}" class="list-group-item d-flex flex-row align-items-center rider-permission-item">
+          {% if member.peloton_profile.image_url %}
+          <img src="{{ member.peloton_profile.image_url }}" alt="{{ member.peloton_profile.username }}" width="24" height="24"
+               class="rounded-circle me-2">
+          {% else %}
+          <span class="user-icon-sm">{{ member.peloton_profile.username|first|upper }}</span>
+          {% endif %}
+          <span class="peloton-username">{{ member.peloton_profile.username }}</span>
+          <label for="select-role-{{ member.uid }}" class="d-none">Select role</label>
+          <select id="select-role-{{ member.uid }}" class="selectpicker ms-auto role-selector">
+            {% for role, display_name in tournament.roles %}
+            <option value="{{ role }}" {% if member.role == role %}selected{% endif %}>{{ display_name }}</option>
+            {% endfor %}
+          </select>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col-12">
+    <button type="button" class="btn btn-primary" onclick="savePermissions();">Save Changes</button>
+  </div>
+</div>

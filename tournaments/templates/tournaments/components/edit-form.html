@@ -1,5 +1,5 @@
 <form class="row g-3" method="post"
-      action="{% if tournament %}{% url "tournaments:edit" tournament.uid %}{% else %}{% url "tournaments:create" %}{% endif %}" >
+      action="{% if tournament %}{% url "tournaments:edit" tournament.uid "settings" %}{% else %}{% url "tournaments:create" %}{% endif %}" >
   {% csrf_token %}
 
   <div class="col-12">
@@ -43,7 +43,7 @@
   </div>
   <hr>
 
-  <div class="col-12">
+  <div class="col-12 mt-0">
     <button type="submit" class="btn btn-primary">{% if tournament %}Save Changes{% else %}Submit{% endif %}</button>
   </div>
 </form>

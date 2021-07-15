@@ -18,7 +18,7 @@ function saveTeams() {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#teams");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid 'teams' %}");
     }
   });
 }
@@ -32,7 +32,7 @@ function deleteTeam(team_id) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#teams");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid 'teams' %}");
     }
   });
 }
@@ -46,7 +46,7 @@ function deleteMember(username) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#teams");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid 'teams' %}");
     }
   });
 }
@@ -61,7 +61,7 @@ function addRide(rideId) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#rides");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid 'rides' %}");
     },
   });
 }
@@ -75,7 +75,7 @@ function deleteRide(rideId) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#rides");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid 'rides' %}");
     }
   });
 }
@@ -149,7 +149,7 @@ function savePermissions() {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#permissions");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid 'permissions' %}");
     }
   });
 }

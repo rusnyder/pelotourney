@@ -13,7 +13,8 @@ urlpatterns = [
     # ex: /ZuwX4mKCPgK06sIin8QJxQ/
     path("<uid>/", views.DetailView.as_view(), name="detail"),
     # ex: /ZuwX4mKCPgK06sIin8QJxQ/edit
-    path("<uid>/edit", views.EditView.as_view(), name="edit"),
+    path("<uid>/edit/", views.EditView.as_view()),
+    path("<uid>/edit/<tab>", views.EditView.as_view(), name="edit"),
     # ex: /ZuwX4mKCPgK06sIin8QJxQ/sync
     path("<uid>/sync", views.SyncView.as_view(), name="sync"),
     # ex: /ZuwX4mKCPgK06sIin8QJxQ/rider_search

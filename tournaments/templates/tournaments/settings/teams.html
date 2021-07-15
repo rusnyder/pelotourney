@@ -1,0 +1,48 @@
+<h4>Unassigned</h4>
+<div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-3 mb-3">
+  <div class="col">
+    <div class="card h-100">
+      <div id="team-unassigned" class="sortable-team list-group list-group-flush" style="min-height: 3rem;">
+        {% include "tournaments/components/team-members.html" with members=tournament.unassigned.all editable=True %}
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card align-items-center">
+      <button type="button" class="btn btn-link text-decoration-none w-100"
+              data-bs-toggle="modal" data-bs-target="#add-rider-modal">
+        <i class="bi-plus-circle pe-2"></i><span>Add Rider</span>
+      </button>
+    </div>
+    <div class="modal fade" id="add-rider-modal" tabindex="-1" aria-labelledby="add-rider-modal-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="{% url "tournaments:rider_search" tournament.uid %}" method="post">
+            {% csrf_token %}
+            <div class="modal-header bg-light">
+              <h5 class="modal-title text-secondary" id="add-rider-modal-label">Add Peloton Riders</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="input-group col-12">
+                <label class="d-none" for="rider_query">Enter a username</label>
+                <input list="rider_list" class="form-control" id="rider_query" autocomplete="off" name="rider_query" placeholder="Enter a username">
+                <span class="input-group-text" id="basic-addon2"><i class="bi-search"></i></span>
+                <datalist id="rider_list"></datalist>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Add Rider</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<h4>Teams</h4>
+<div class="row row-cols-1 row-cols-lg-3 row-cols-md-2 g-3 mb-3">
+  {% include "tournaments/components/team-list.html" with tournament=tournament editable=True %}
+</div>
+<button class="btn btn-primary" onclick="saveTeams();">Save Changes</button>

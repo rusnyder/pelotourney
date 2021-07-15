@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render, reverse
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import dateparse, timezone
 from django.views import generic
 
@@ -70,7 +70,7 @@ class CreateView(generic.View):
             peloton_profile=request.user.profile,
             role=TournamentMember.Role.OWNER,
         )
-        return redirect("tournaments:detail", tournament.id)
+        return redirect("tournaments:detail", tournament.uid)
 
 
 class DetailView(generic.View):
@@ -86,17 +86,28 @@ class DetailView(generic.View):
 
 
 class EditView(LoginRequiredMixin, generic.View):
-    def get(self, request, uid):
+    SETTINGS_TABS = {"settings", "rides", "teams", "permissions"}
+
+    def get(self, request, uid, tab=None):
+        # Redirect to the default settings tab (keeps URL consistent)
+        if not tab:
+            return redirect("tournaments:edit", uid, "settings")
+        elif tab not in self.SETTINGS_TABS:
+            return HttpResponseNotFound()
+
         tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins:
             raise PermissionDenied()
-        context = {"tournament": tournament}
+        context = {"tournament": tournament, "settings_tab": tab}
         return render(request, "tournaments/edit.html", context)
 
-    def post(self, request, uid):
+    def post(self, request, uid, tab=None):
         tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins:
             raise PermissionDenied()
+
+        if tab and tab not in self.SETTINGS_TABS:
+            return HttpResponseNotFound()
 
         # Save all form fields again (even if it's a noop, this is just easier)
         start_date = datetime.combine(
@@ -113,8 +124,8 @@ class EditView(LoginRequiredMixin, generic.View):
         tournament.visibility = request.POST["visibility"]
         tournament.save()
 
-        # Redirect to the tournament page
-        return redirect("tournaments:detail", tournament.id)
+        # Redirect to either the tournament page (new) or setting (edit)
+        return redirect("tournaments:detail", tournament.uid)
 
 
 class SyncView(LoginRequiredMixin, generic.View):
@@ -157,7 +168,7 @@ class SyncView(LoginRequiredMixin, generic.View):
         # Redirect back to the tournament page
         tournament.last_synced = datetime.utcnow()
         tournament.save()
-        return redirect("tournaments:detail", tournament.id)
+        return redirect("tournaments:detail", tournament.uid)
 
 
 class RiderSearchView(LoginRequiredMixin, generic.View):
@@ -186,7 +197,7 @@ class RiderSearchView(LoginRequiredMixin, generic.View):
                 role=TournamentMember.Role.MEMBER,
             )
 
-        return HttpResponseRedirect(reverse("tournaments:edit", args=[uid]) + "#teams")
+        return redirect("tournaments:edit", uid, "teams")
 
     def delete(self, request, uid):
         tournament = get_object_or_404(Tournament, uid=uid)
@@ -212,7 +223,7 @@ class EditTeamsView(LoginRequiredMixin, generic.View):
             tournament=tournament,
             name=team_name,
         )
-        return HttpResponseRedirect(reverse("tournaments:edit", args=[uid]) + "#teams")
+        return redirect("tournaments:edit", uid, "teams")
 
     def delete(self, request, uid):
         tournament = get_object_or_404(Tournament, uid=uid)
@@ -297,7 +308,7 @@ class EditRidesView(LoginRequiredMixin, generic.View):
             tournament=tournament,
             ride=ride,
         )
-        return HttpResponseRedirect(reverse("tournaments:edit", args=[uid]) + "#rides")
+        return redirect("tournaments:edit", uid, "rides")
 
     def delete(self, request, uid):
         tournament = get_object_or_404(Tournament, uid=uid)
