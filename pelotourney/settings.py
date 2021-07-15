@@ -31,7 +31,8 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
+DEBUG = os.getenv("DEBUG", True if ENVIRONMENT == "dev" else False)
 
 ALLOWED_HOSTS = []
 DOMAIN = os.getenv("DOMAIN")
@@ -221,3 +222,8 @@ AUTHENTICATION_BACKENDS = {
     "auth0login.auth0backend.Auth0",
     "django.contrib.auth.backends.ModelBackend",
 }
+
+# SSL Redirect
+if ENVIRONMENT == "prod":
+    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", True)
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
