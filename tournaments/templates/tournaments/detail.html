@@ -58,7 +58,17 @@
             title="Only participants can see this tournament.">Private</span>
       {% endif %}
     </div>
-    <a href="{% url "tournaments:edit" tournament.id %}" class="btn btn-primary">Edit Tournament</a>
+    {% if user.is_authenticated %}
+    <span {% if user.profile not in tournament.admins %}
+          data-bs-toggle="tooltip" data-bs-placement="left"
+          title="Only tournament admins can edit this tournament."
+          {% endif %}>
+      <a href="{% url "tournaments:edit" tournament.id %}"
+         class="btn btn-primary {% if user.profile not in tournament.admins %}disabled{% endif %}">
+        Edit Tournament
+      </a>
+    </span>
+    {% endif %}
   </div>
 
   <div class="d-flex flex-row align-items-center mb-0">
@@ -139,7 +149,16 @@
         </div>
         <div class="col">
           <div class="fw-bold text-uppercase text-black-50">Average Output</div>
-          <div class="fw-light">{{ team.best_workouts|select:"average_output"|sum|div:team.best_workouts.count|floatformat:0 }} <span class="small">watts</span></div>
+          <div class="fw-light">
+            {% with team_workout_count=team.best_workouts.count %}
+            {% if team_workout_count > 0 %}
+              {{ team.best_workouts|select:"average_output"|sum|div:team_workout_count|floatformat:0 }}
+            {% else %}
+              0
+            {% endif %}
+            {% endwith %}
+            <span class="small">watts</span>
+          </div>
         </div>
       </div>
       <div class="table-responsive">

@@ -356,7 +356,7 @@ class TournamentTeam(models.Model):
         """Returns the sum of outputs the best ride for each rider for this tournament"""
         return self._best_workouts_filter(returns="total_work").aggregate(
             sum=Sum("total_work")
-        )["sum"]
+        )["sum"] or 0
 
     def _best_workouts_filter(self, returns: str) -> QuerySet:
         return Workout.objects.filter(
