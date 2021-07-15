@@ -18,6 +18,19 @@ import structlog
 from django.urls import reverse_lazy
 from dotenv import load_dotenv
 
+
+def getenv_bool(envvar: str, default: bool = False) -> bool:
+    val = os.getenv(envvar)
+    if not val or not envvar.strip():
+        return default
+    elif val.strip().lower() in {"1", "on", "yes", "t", "true"}:
+        return True
+    elif val.strip().lower() in {"0", "off", "no", "f", "false"}:
+        return False
+    else:
+        raise ValueError(f"Unable to parse value as boolean: {envvar}={val!r}")
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,12 +40,26 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
-
 # SECURITY WARNING: don't run with debug turned on in production!
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
-DEBUG = os.getenv("DEBUG", True if ENVIRONMENT == "dev" else False)
+DEBUG = getenv_bool("DEBUG", True if ENVIRONMENT == "dev" else False)
+
+# Django Debug Toolbar
+# Only enabled if (a) it's installed and (b) DEBUG is set
+DEBUG_TOOLBAR = getenv_bool("DEBUG_TOOLBAR", DEBUG)
+if DEBUG_TOOLBAR:
+    try:
+        import debug_toolbar
+    except ImportError:
+        debug_toolbar = False
+else:
+    debug_toolbar = False
+
+if debug_toolbar:
+    INTERNAL_IPS = ["127.0.0.1"]
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 ALLOWED_HOSTS = []
 DOMAIN = os.getenv("DOMAIN")
@@ -54,18 +81,26 @@ INSTALLED_APPS = [
     "social_django",
     "auth0login",
 ]
+if debug_toolbar:
+    INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_structlog.middlewares.RequestMiddleware",
 ]
+if debug_toolbar:
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+MIDDLEWARE.extend(
+    [
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "django_structlog.middlewares.RequestMiddleware",
+    ]
+)
 
 ROOT_URLCONF = "pelotourney.urls"
 

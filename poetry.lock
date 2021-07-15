@@ -171,6 +171,18 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-debug-toolbar"
+version = "3.2.1"
+description = "A configurable set of panels that display various debug information about the current request/response."
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Django = ">=2.2"
+sqlparse = ">=0.2.0"
+
+[[package]]
 name = "django-fernet-fields"
 version = "0.6"
 description = "Fernet-encrypted model fields for Django"
@@ -727,7 +739,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.7"
-content-hash = "50c856331f352157ed7bac53f11d67e1404e7cdcfcd184c55b3a1462b568eb75"
+content-hash = "8f4e66f16d016f4c5a583e1fd5be97d530a67a1047f7967366448c19d38022a5"
 
 [metadata.files]
 appdirs = [
@@ -842,6 +854,10 @@ dj-database-url = [
 django = [
     {file = "Django-3.2.5-py3-none-any.whl", hash = "sha256:c58b5f19c5ae0afe6d75cbdd7df561e6eb929339985dbbda2565e1cabb19a62e"},
     {file = "Django-3.2.5.tar.gz", hash = "sha256:3da05fea54fdec2315b54a563d5b59f3b4e2b1e69c3a5841dda35019c01855cd"},
+]
+django-debug-toolbar = [
+    {file = "django-debug-toolbar-3.2.1.tar.gz", hash = "sha256:a5ff2a54f24bf88286f9872836081078f4baa843dc3735ee88524e89f8821e33"},
+    {file = "django_debug_toolbar-3.2.1-py3-none-any.whl", hash = "sha256:e759e63e3fe2d3110e0e519639c166816368701eab4a47fed75d7de7018467b9"},
 ]
 django-fernet-fields = [
     {file = "django-fernet-fields-0.6.tar.gz", hash = "sha256:7f7e03c86d9473a42031ebade2b15be1484aad18ef5576ddab156c4667e04c4a"},
