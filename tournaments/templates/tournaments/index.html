@@ -44,7 +44,7 @@
               {# See: https://getbootstrap.com/docs/5.0/helpers/stretched-link/#identifying-the-containing-block #}
               {% for tournament in tournaments|get_item:key %}
               <tr style="transform: rotate(0);">
-                <td><a class="text-dark stretched-link text-decoration-none" href="{% url 'tournaments:detail' tournament.id %}">{{ tournament.name }}</a></td>
+                <td><a class="text-dark stretched-link text-decoration-none" href="{% url 'tournaments:detail' tournament.uid %}">{{ tournament.name }}</a></td>
                 <td>{{ tournament.start_date }}</td>
                 <td>{{ tournament.end_date }}</td>
                 <td>{{ tournament.participants.count }}</td>

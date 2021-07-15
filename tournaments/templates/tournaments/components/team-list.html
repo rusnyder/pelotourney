@@ -54,7 +54,7 @@
     <div class="modal fade" id="add-team-modal" tabindex="-1" aria-labelledby="add-team-modal-label" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <form action="{% url 'tournaments:teams' tournament.id %}" method="post">
+          <form action="{% url 'tournaments:teams' tournament.uid %}" method="post">
             {% csrf_token %}
             <div class="modal-header">
               <h5 class="modal-title" id="add-team-modal-label">Add Team</h5>

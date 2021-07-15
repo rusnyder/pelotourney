@@ -26,12 +26,12 @@
     // Trigger the sync
     $.ajax({
       type: "POST",
-      url: "{% url 'tournaments:sync' tournament.id %}",
+      url: "{% url 'tournaments:sync' tournament.uid %}",
       beforeSend: function(xhr) {
         xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
       },
       success: function(data) {
-        redirectOrRefresh("{% url 'tournaments:detail' tournament.id %}");
+        redirectOrRefresh("{% url 'tournaments:detail' tournament.uid %}");
       },
       error: function(xhr) {
         button.html(originalHTML);
@@ -63,7 +63,7 @@
           data-bs-toggle="tooltip" data-bs-placement="left"
           title="Only tournament admins can edit this tournament."
           {% endif %}>
-      <a href="{% url "tournaments:edit" tournament.id %}"
+      <a href="{% url "tournaments:edit" tournament.uid %}"
          class="btn btn-primary {% if user.profile not in tournament.admins %}disabled{% endif %}">
         Edit Tournament
       </a>

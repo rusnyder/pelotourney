@@ -27,7 +27,7 @@
   <div class="mx-auto" style="max-width: 992px;">
     <div class="d-flex flex-row align-items-center mb-2">
       <h3 class="mb-0 me-auto">Edit Tournament</h3>
-      <a href="{% url "tournaments:detail" tournament.id %}" class="btn btn-secondary">Back to Tournament</a>
+      <a href="{% url "tournaments:detail" tournament.uid %}" class="btn btn-secondary">Back to Tournament</a>
     </div>
     <p class="text-muted">{{ tournament.name }}</p>
 
@@ -62,7 +62,7 @@
               <div class="modal fade" id="add-rider-modal" tabindex="-1" aria-labelledby="add-rider-modal-label" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
-                    <form action="{% url "tournaments:rider_search" tournament.id %}" method="post">
+                    <form action="{% url "tournaments:rider_search" tournament.uid %}" method="post">
                       {% csrf_token %}
                       <div class="modal-header bg-light">
                         <h5 class="modal-title text-secondary" id="add-rider-modal-label">Add Peloton Riders</h5>

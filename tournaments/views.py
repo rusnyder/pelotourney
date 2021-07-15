@@ -74,8 +74,8 @@ class CreateView(generic.View):
 
 
 class DetailView(generic.View):
-    def get(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def get(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if not (
             tournament.visibility == Tournament.Visibility.PUBLIC
             or request.user.is_authenticated
@@ -86,15 +86,15 @@ class DetailView(generic.View):
 
 
 class EditView(LoginRequiredMixin, generic.View):
-    def get(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def get(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins:
             raise PermissionDenied()
         context = {"tournament": tournament}
         return render(request, "tournaments/edit.html", context)
 
-    def post(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def post(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins:
             raise PermissionDenied()
 
@@ -118,9 +118,9 @@ class EditView(LoginRequiredMixin, generic.View):
 
 
 class SyncView(LoginRequiredMixin, generic.View):
-    def post(self, request, pk):
+    def post(self, request, uid):
         # Ensure the tournament exists
-        tournament = get_object_or_404(Tournament, pk=pk)
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins:
             raise PermissionDenied()
 
@@ -161,14 +161,14 @@ class SyncView(LoginRequiredMixin, generic.View):
 
 
 class RiderSearchView(LoginRequiredMixin, generic.View):
-    def get(self, request, pk):
+    def get(self, request, uid):
         # Search for riders
         client = _get_client(request)
         riders = client.search_users(request.GET["rider_query"])
         return JsonResponse(riders, safe=False)
 
-    def post(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def post(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins:
             raise PermissionDenied()
 
@@ -186,10 +186,10 @@ class RiderSearchView(LoginRequiredMixin, generic.View):
                 role=TournamentMember.Role.MEMBER,
             )
 
-        return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#teams")
+        return HttpResponseRedirect(reverse("tournaments:edit", args=[uid]) + "#teams")
 
-    def delete(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def delete(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins.all():
             raise PermissionDenied()
 
@@ -202,8 +202,8 @@ class RiderSearchView(LoginRequiredMixin, generic.View):
 
 
 class EditTeamsView(LoginRequiredMixin, generic.View):
-    def post(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def post(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins.all():
             raise PermissionDenied()
 
@@ -212,10 +212,10 @@ class EditTeamsView(LoginRequiredMixin, generic.View):
             tournament=tournament,
             name=team_name,
         )
-        return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#teams")
+        return HttpResponseRedirect(reverse("tournaments:edit", args=[uid]) + "#teams")
 
-    def delete(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def delete(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins.all():
             raise PermissionDenied()
 
@@ -226,8 +226,8 @@ class EditTeamsView(LoginRequiredMixin, generic.View):
 
 
 class BulkUpdateTeamsView(LoginRequiredMixin, generic.View):
-    def post(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def post(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins.all():
             raise PermissionDenied()
 
@@ -247,7 +247,7 @@ class BulkUpdateTeamsView(LoginRequiredMixin, generic.View):
 
 
 class RideFiltersView(LoginRequiredMixin, generic.View):
-    def get(self, request, pk):
+    def get(self, request, uid):
         client = _get_client(request)
         resp = client.get_json(
             "/api/ride/filters",
@@ -258,7 +258,7 @@ class RideFiltersView(LoginRequiredMixin, generic.View):
 
 
 class EditRidesView(LoginRequiredMixin, generic.View):
-    def get(self, request, pk):
+    def get(self, request, uid):
         client = _get_client(request)
         instructor_id = request.GET.get("instructor_id") or None
         duration = request.GET.get("duration") or None
@@ -269,8 +269,8 @@ class EditRidesView(LoginRequiredMixin, generic.View):
         )
         return JsonResponse(resp, status=200)
 
-    def post(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def post(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins.all():
             raise PermissionDenied()
 
@@ -282,10 +282,10 @@ class EditRidesView(LoginRequiredMixin, generic.View):
             tournament=tournament,
             ride=ride,
         )
-        return HttpResponseRedirect(reverse("tournaments:edit", args=[pk]) + "#rides")
+        return HttpResponseRedirect(reverse("tournaments:edit", args=[uid]) + "#rides")
 
-    def delete(self, request, pk):
-        tournament = get_object_or_404(Tournament, pk=pk)
+    def delete(self, request, uid):
+        tournament = get_object_or_404(Tournament, uid=uid)
         if request.user.profile not in tournament.admins.all():
             raise PermissionDenied()
 

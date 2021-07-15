@@ -4,6 +4,7 @@ from functools import reduce
 from operator import ior
 from typing import TypeVar
 
+import nanoid
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import F, Q, QuerySet, Subquery, Sum, Window
@@ -16,7 +17,30 @@ from .external.peloton import NotAuthenticated, PelotonClient
 PelotonModelType = TypeVar("PelotonModelType", bound="PelotonModel")
 
 
-class PelotonModel(models.Model):
+def random_uid():
+    """
+    Wrapper around nanoid that pins the number of characters generated
+    to protect against upstream changes.
+    """
+    return nanoid.generate(size=21)
+
+
+class BaseModel(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    uid = models.CharField(
+        max_length=32,
+        null=False,
+        blank=False,
+        unique=True,
+        editable=False,
+        default=random_uid,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class PelotonModel(BaseModel):
     peloton_id = models.CharField(max_length=64, unique=True)
     raw = models.JSONField(null=True)
 
@@ -238,68 +262,8 @@ class Workout(PelotonModel):
             f")"
         )
 
-    # raw = {
-    #     "created_at": 1625682577,
-    #     "device_type": "home_bike_plus",
-    #     "end_time": 1625683837,
-    #     "fitness_discipline": "cycling",
-    #     "has_pedaling_metrics": True,
-    #     "has_leaderboard_metrics": True,
-    #     "id": "fbc535d3b86945e19a2e24e3d3cbff3c",
-    #     "is_total_work_personal_record": True,
-    #     "metrics_type": "cycling",
-    #     "name": "Cycling Workout",
-    #     "peloton_id": "1996f066a68549d688b74a0cfb07c731",
-    #     "platform": "home_bike",
-    #     "start_time": 1625682638,
-    #     "status": "COMPLETE",
-    #     "timezone": "Etc/GMT+4",
-    #     "title": None,
-    #     "total_work": 272043.15,
-    #     "user_id": "e41553cad50a45379a8513713c92ee50",
-    #     "workout_type": "class",
-    #     "total_video_watch_time_seconds": 1231,
-    #     "total_video_buffering_seconds": 0,
-    #     "v2_total_video_watch_time_seconds": 1266,
-    #     "v2_total_video_buffering_seconds": 0,
-    #     "total_music_audio_play_seconds": None,
-    #     "total_music_audio_buffer_seconds": None,
-    #     "created": 1625682577,
-    #     "device_time_created_at": 1625668177,
-    #     "strava_id": None,
-    #     "fitbit_id": None,
-    #     "is_skip_intro_available": True,
-    #     "ride": {},
-    #     "total_heart_rate_zone_durations": None,
-    #     "average_effort_score": None,
-    #     "achievement_templates": [
-    #         {
-    #             "id": "bac5aefabb2940ba8f0a170fc9d63bf0",
-    #             "name": "Best Output",
-    #             "slug": "best_output",
-    #             "image_url": "https://s3.amazonaws.com/peloton-achievement-images-prod/c302f0a5128e4e5bb72ba659caac1ec2",
-    #             "description": "Personal best output in a workout.",
-    #         },
-    #         {
-    #             "id": "1b0f7ba0b9e945e88c93792484995c00",
-    #             "name": "Three's Company",
-    #             "slug": "threes_company",
-    #             "image_url": "https://s3.amazonaws.com/peloton-achievement-images-prod/a1a3e04a6cd64933a5099dc26bd63552",
-    #             "description": "Awarded for working out with 2 friends.",
-    #         },
-    #     ],
-    #     "leaderboard_rank": 2777,
-    #     "total_leaderboard_users": 26857,
-    #     "ftp_info": {
-    #         "ftp": 196,
-    #         "ftp_source": "ftp_workout_source",
-    #         "ftp_workout_id": "ddd730e7f091467f90b6daa9c0d338ee",
-    #     },
-    #     "device_type_display_name": "Bike",
-    # }
 
-
-class Tournament(models.Model):
+class Tournament(BaseModel):
     class Format(models.TextChoices):
         SIMPLE = "simple", _("Simple")
 
@@ -338,7 +302,7 @@ class Tournament(models.Model):
         return self.name
 
 
-class TournamentTeam(models.Model):
+class TournamentTeam(BaseModel):
     name = models.CharField(max_length=200)
     tournament = models.ForeignKey(
         Tournament, on_delete=models.CASCADE, related_name="teams"
@@ -376,12 +340,12 @@ class TournamentTeam(models.Model):
         return self.name
 
 
-class TournamentRide(models.Model):
+class TournamentRide(BaseModel):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     ride = models.ForeignKey(Ride, on_delete=models.CASCADE)
 
 
-class TournamentMember(models.Model):
+class TournamentMember(BaseModel):
     class Role(models.TextChoices):
         OWNER = "owner", _("Owner")
         MANAGER = "manager", _("Manager")

@@ -11,14 +11,14 @@ function saveTeams() {
   }).toArray();
   $.ajax({
     type: "POST",
-    url: "{% url 'tournaments:update_teams' tournament.id %}",
+    url: "{% url 'tournaments:update_teams' tournament.uid %}",
     data: JSON.stringify(teams),
     contentType: "application/json; charset=utf-8",
     beforeSend: function(xhr) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.id %}#teams");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#teams");
     }
   });
 }
@@ -26,13 +26,13 @@ function saveTeams() {
 function deleteTeam(team_id) {
   $.ajax({
     type: "DELETE",
-    url: "{% url 'tournaments:teams' tournament.id %}",
+    url: "{% url 'tournaments:teams' tournament.uid %}",
     data: team_id,
     beforeSend: function(xhr) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.id %}#teams");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#teams");
     }
   });
 }
@@ -40,20 +40,20 @@ function deleteTeam(team_id) {
 function deleteMember(username) {
   $.ajax({
     type: "DELETE",
-    url: "{% url 'tournaments:rider_search' tournament.id %}",
+    url: "{% url 'tournaments:rider_search' tournament.uid %}",
     data: username,
     beforeSend: function(xhr) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.id %}#teams");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#teams");
     }
   });
 }
 
 function addRide(rideId) {
   $.ajax({
-    url: "{% url 'tournaments:rides' tournament.id %}",
+    url: "{% url 'tournaments:rides' tournament.uid %}",
     type: "POST",
     data: JSON.stringify({ ride_id: rideId }),
     contentType: "application/json; charset=utf-8",
@@ -61,7 +61,7 @@ function addRide(rideId) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.id %}#rides");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#rides");
     },
   });
 }
@@ -69,13 +69,13 @@ function addRide(rideId) {
 function deleteRide(rideId) {
   $.ajax({
     type: "DELETE",
-    url: "{% url 'tournaments:rides' tournament.id %}",
+    url: "{% url 'tournaments:rides' tournament.uid %}",
     data: rideId,
     beforeSend: function(xhr) {
       xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'))
     },
     success: function(data) {
-      redirectOrRefresh("{% url 'tournaments:edit' tournament.id %}#rides");
+      redirectOrRefresh("{% url 'tournaments:edit' tournament.uid %}#rides");
     }
   });
 }
@@ -90,7 +90,7 @@ function updateRidesModal() {
     </div>
   `.trim())
   $.ajax({
-    url: "{% url 'tournaments:rides' tournament.id %}",
+    url: "{% url 'tournaments:rides' tournament.uid %}",
     type: "GET",
     data: {
       instructor_id: $("#ride-modal-instructor-id").val(),
@@ -159,7 +159,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
   $("#rider_query").on("input", debounce(250, function () {
     $.ajax({
-      url: "{% url 'tournaments:rider_search' tournament.id %}",
+      url: "{% url 'tournaments:rider_search' tournament.uid %}",
       type: "GET",
       data: { "rider_query": $("#rider_query").val() },
       dataType: "json",
@@ -189,7 +189,7 @@ window.addEventListener("DOMContentLoaded", function() {
     if (selectIsEmpty(instructorsSelect) || selectIsEmpty(durationsSelect)) {
       // Only need to populate filters if they are empty
       $.ajax({
-        url: "{% url 'tournaments:ride_filters' tournament.id %}",
+        url: "{% url 'tournaments:ride_filters' tournament.uid %}",
         type: "GET",
         dataType: "json",
         success: function (data) {
