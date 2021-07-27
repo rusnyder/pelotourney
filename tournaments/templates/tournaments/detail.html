@@ -144,6 +144,10 @@
           <div class="fw-light">{{ team.total_work|div:1000|floatformat:0 }} <span class="small">kj</span></div>
         </div>
         <div class="col">
+          <div class="fw-bold text-uppercase text-black-50">Total Ride Time</div>
+          <div class="fw-light">{{ team.total_duration|div:60|floatformat:0 }} <span class="small">min</span></div>
+        </div>
+        <div class="col">
           <div class="fw-bold text-uppercase text-black-50">Qualifying Rides</div>
           <div class="fw-light">{{ team.best_workouts.count }}</div>
         </div>

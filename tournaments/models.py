@@ -328,6 +328,18 @@ class TournamentTeam(BaseModel):
             or 0
         )
 
+    @property
+    def total_duration(self) -> float:
+        """Returns the sum of durations the best ride for each rider for this tournament (in seconds)"""
+        total_duration = 0
+        for workout in self.best_workouts:
+            total_duration += (
+                (workout.end_time - workout.start_time).total_seconds()
+                if workout.end_time
+                else 0
+            )
+        return total_duration
+
     def _best_workouts_filter(self, returns: str) -> QuerySet:
         return Workout.objects.filter(
             peloton_profile__tournamentteam=self, ride__tournament=self.tournament
