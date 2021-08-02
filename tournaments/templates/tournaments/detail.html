@@ -64,7 +64,7 @@
           title="Only tournament admins can edit this tournament."
           {% endif %}>
       <a href="{% url "tournaments:edit" tournament.uid "settings" %}"
-         class="btn btn-primary {% if user.profile not in tournament.admins %}disabled{% endif %}">
+         class="btn btn-primary {% if not user.profile.has_valid_session or user.profile not in tournament.admins %}disabled{% endif %}">
         Edit Tournament
       </a>
     </span>
@@ -83,7 +83,7 @@
     </div>
     {% if user.profile in tournament.admins %}
     <span {% if not user.profile.has_valid_session %}tabindex="0" data-bs-toggle="tooltip" data-bs-placement="left" title="Link Peloton Profile to enable syncing"{% endif %}>
-      <button id="sync-now-button" class="btn btn-outline-success" {% if not user.profile.peloton_session_id %}disabled{% endif %}
+      <button id="sync-now-button" class="btn btn-outline-success" {% if not user.profile.has_valid_session %}disabled{% endif %}
               type="button" onclick="syncTournament();">
         <i class="bi-arrow-repeat pe-2"></i>Sync Now
       </button>

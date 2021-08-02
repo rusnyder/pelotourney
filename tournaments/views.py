@@ -159,7 +159,10 @@ class SyncView(LoginRequiredMixin, generic.View):
             workouts = client.get_workouts(
                 user_id=participant.peloton_id,
                 start_date=tournament.start_date,
-                end_date=tournament.end_date,
+                # TODO[RWS]: HACK!  This is covering for two bugs:
+                #   1. The end date is set to noon, not midnight (+12)
+                #   2. The start/end dates are non-configurably anchored in UTC (+5)
+                end_date=tournament.end_date + timedelta(hours=17),
                 ride_ids=tournament.rides.values_list("peloton_id", flat=True),
             )
             for workout_data in workouts:
